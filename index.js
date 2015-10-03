@@ -215,8 +215,9 @@ DubAPI.prototype.disconnect = function() {
         this._.pubNub.unsubscribe({
             channel: this._.room.realTimeChannel,
         });
-    }
 
+        this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomUsers});
+    }
 
     this._.slug = undefined;
     this._.room = undefined;

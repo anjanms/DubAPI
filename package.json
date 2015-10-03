@@ -1,0 +1,26 @@
+{
+  "name": "dubapi",
+  "version": "0.1.0",
+  "description": "A NodeJS module for creating dubtrack.fm bots",
+  "main": "index.js",
+  "author": "anjanms",
+  "dependencies": {
+    "deep-assign": "^1.0.0",
+    "pubnub": "^3.7.14",
+    "request": "^2.64.0"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "keywords": [
+    "bot",
+    "api",
+    "dubtrack",
+    "dubtrack.fm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anjanms/DubAPI"
+  }
+}

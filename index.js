@@ -212,6 +212,8 @@ DubAPI.prototype.disconnect = function() {
     var name = this._.room ? this._.room.name : undefined;
 
     if (this._.room) {
+        clearTimeout(this._.room.playTimeout);
+
         this._.pubNub.unsubscribe({
             channel: this._.room.realTimeChannel,
         });

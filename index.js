@@ -449,7 +449,7 @@ DubAPI.prototype.getMods = function() {
 DubAPI.prototype.getStaff = function() {
     if (!this._.connected) return;
 
-    return [this.getCreator()].concat(this.getMods());
+    return this._.room.getStaff().map(function(userModel) {return userModel.toNewObject();});
 };
 
 /*

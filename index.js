@@ -106,6 +106,14 @@ DubAPI.prototype._fetchMedia = function() {
         that._.room.play = new PlayModel(body.data.song);
         that._.room.play.media = new MediaModel(body.data.songInfo);
 
+        if (body.data.startTime * 1000 > that._.room.play.songLength) {
+            that._.room.play = undefined;
+
+            that.emit('*', {type: events.roomPlaylistUpdate});
+            that.emit(events.roomPlaylistUpdate, {type: events.roomPlaylistUpdate});
+            return;
+        }
+
         clearTimeout(that._.room.playTimeout);
         that._.room.playTimeout = setTimeout(that._fetchMedia.bind(that), that._.room.play.getTimeRemaining() + 5000);
 

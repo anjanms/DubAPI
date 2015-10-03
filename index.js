@@ -119,8 +119,7 @@ DubAPI.prototype._fetchMedia = function() {
 
         that._.reqHandler.queue({method: 'GET', url: endpoints.roomPlaylistActiveDubs}, function(code, body) {
             if (code !== 200) {
-                that.emit('error', new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.roomPlaylistActiveDubs)));
-                return that.disconnect();
+                return that.emit('error', new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.roomPlaylistActiveDubs)));
             }
 
             body.data.currentSong = new PlayModel(body.data.currentSong);

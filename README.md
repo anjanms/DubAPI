@@ -7,7 +7,7 @@ A NodeJS API for creating dubtrack.fm bots.
 ## Usage
 
 ```
-npm install anjanms/DubAPI
+npm install git+https://github.com/anjanms/DubAPI
 ```
 
 ```javascript

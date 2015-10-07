@@ -115,7 +115,7 @@ DubAPI.prototype._fetchMedia = function() {
         }
 
         clearTimeout(that._.room.playTimeout);
-        that._.room.playTimeout = setTimeout(that._fetchMedia.bind(that), that._.room.play.getTimeRemaining() + 5000);
+        that._.room.playTimeout = setTimeout(that._fetchMedia.bind(that), that._.room.play.getTimeRemaining() + 15000);
 
         that._.reqHandler.queue({method: 'GET', url: endpoints.roomPlaylistActiveDubs}, function(code, body) {
             if (code !== 200) {

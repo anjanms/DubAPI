@@ -43,3 +43,6 @@ new DubAPI({username: '', password: ''}, function(err, bot) {
 });
 
 ```
+## Credit
+
+- Design cues taken from [PlugAPI](https://github.com/plugCubed/plugAPI)

@@ -5,7 +5,6 @@
   "main": "index.js",
   "author": "anjanms",
   "dependencies": {
-    "deep-assign": "^1.0.0",
     "pubnub": "^3.7.14",
     "request": "^2.64.0"
   },

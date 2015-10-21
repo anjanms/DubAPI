@@ -1,8 +1,7 @@
 
 var util = require('util'),
     eventEmitter = require('events').EventEmitter,
-    pubnub = require('pubnub'),
-    deepAssign = require('deep-assign');
+    pubnub = require('pubnub');
 
 var MediaModel = require('./lib/models/mediaModel.js'),
     PlayModel = require('./lib/models/playModel.js'),
@@ -17,6 +16,7 @@ var DubAPIError = require('./lib/errors/error.js'),
 
 var utils = require('./lib/utils.js'),
     events = require('./lib/data/events.js'),
+    roles = require('./lib/data/roles.js'),
     package = require('./package.json'),
     endpoints = require('./lib/data/endpoints.js');
 
@@ -84,7 +84,8 @@ function DubAPI(auth, callback) {
 
 util.inherits(DubAPI, eventEmitter);
 
-DubAPI.prototype.events = deepAssign({}, events);
+DubAPI.prototype.events = events;
+DubAPI.prototype.roles = roles;
 DubAPI.prototype.version = package.version;
 
 DubAPI.prototype._fetchMedia = function() {
@@ -128,10 +129,12 @@ DubAPI.prototype._fetchMedia = function() {
 
             for (var i = 0; i < body.data.upDubs.length; i++) {
                 that._.room.play.dubs[body.data.upDubs[i].userid] = 'updub';
+                that._.room.users.findWhere({id: body.data.upDubs[i].userid}).set({dub: 'updub'});
             }
 
             for (var j = 0; j < body.data.downDubs.length; j++) {
                 that._.room.play.dubs[body.data.downDubs[j].userid] = 'downdub';
+                that._.room.users.findWhere({id: body.data.downDubs[j].userid}).set({dub: 'downdub'});
             }
 
             that._.room.play.updubs = body.data.currentSong.updubs;
@@ -140,8 +143,8 @@ DubAPI.prototype._fetchMedia = function() {
             var event = {};
 
             event.raw = raw;
-            event.media = that._.room.play.media.toNewObject();
-            event.user = that._.room.getDJ().toNewObject();
+            event.media = utils.clone(that._.room.play.media);
+            event.user = utils.clone(that._.room.users.findWhere({id: that._.room.play.user}));
             event.id = that._.room.play.id;
             event.type = events.roomPlaylistUpdate;
 
@@ -194,7 +197,9 @@ DubAPI.prototype.connect = function(slug) {
                     return that.disconnect();
                 }
 
-                that._.room.addUsers(body.data.map(function(data) {return new UserModel(data);}));
+                body.data.map(function(data) {return new UserModel(data);}).forEach(function(userModel) {
+                    that._.room.users.add(userModel);
+                });
 
                 that._fetchMedia();
 
@@ -238,6 +243,10 @@ DubAPI.prototype.reconnect = function() {
     this.connect(slug);
 };
 
+DubAPI.prototype.getChatHistory = function() {
+    return utils.clone(this._.room.chat, true);
+};
+
 DubAPI.prototype.sendChat = function(message) {
     if (!this._.connected) return;
 
@@ -279,7 +288,7 @@ DubAPI.prototype.sendChat = function(message) {
 
 DubAPI.prototype.moderateSkip = function(callback) {
     if (!this._.connected || !this._.room.play) return;
-    if (!this._.room.isStaff(this._.room.getUser(this._.self.id))) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('skip')) return;
 
     if (this._.room.play.skipped) return;
 
@@ -288,11 +297,21 @@ DubAPI.prototype.moderateSkip = function(callback) {
     this._.reqHandler.queue({method: 'POST', url: endpoints.chatSkip, form: form}, callback);
 };
 
+DubAPI.prototype.moderateDeleteChat = function(id, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('delete-chat')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatDelete.replace('%CID%', id)}, callback);
+};
+
 DubAPI.prototype.moderateBanUser = function(id, time, callback) {
     if (!this._.connected) return;
-    if (!this._.room.isStaff(this._.room.getUser(this._.self.id))) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return;
 
-    if (this._.room.isStaff(this._.room.getUser(id))) return;
+    var user = this._.room.users.findWhere({id: id});
+    if (user && user.role !== null) return;
 
     if (typeof time === 'function') {
         callback = time;
@@ -305,53 +324,57 @@ DubAPI.prototype.moderateBanUser = function(id, time, callback) {
 
     var form = {realTimeChannel: this._.room.realTimeChannel, time: time ? time : 0};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatBan, user: id, form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.chatBan.replace('%UID%', id), form: form}, callback);
 };
 
 DubAPI.prototype.moderateUnbanUser = function(id, callback) {
     if (!this._.connected) return;
-    if (!this._.room.isStaff(this._.room.getUser(this._.self.id))) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatBan, user: id, form: form}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatBan.replace('%UID%', id), form: form}, callback);
 };
 
 DubAPI.prototype.moderateKickUser = function(id, callback) {
     if (!this._.connected) return;
-    if (!this._.room.isStaff(this._.room.getUser(this._.self.id))) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('kick')) return;
+
+    var user = this._.room.users.findWhere({id: id});
+    if (user && user.role !== null) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatKick, user: id, form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.chatKick.replace('%UID%', id), form: form}, callback);
 };
 
 DubAPI.prototype.moderateMuteUser = function(id, callback) {
     if (!this._.connected) return;
-    if (!this._.room.isStaff(this._.room.getUser(this._.self.id))) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
 
-    if (this._.room.isStaff(this._.room.getUser(id))) return;
+    var user = this._.room.users.findWhere({id: id});
+    if (user && user.role !== null) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatMute, user: id, form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.chatMute.replace('%UID%', id), form: form}, callback);
 };
 
 DubAPI.prototype.moderateUnmuteUser = function(id, callback) {
     if (!this._.connected) return;
-    if (!this._.room.isStaff(this._.room.getUser(this._.self.id))) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute, user: id, form: form}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute.replace('%UID%', id), form: form}, callback);
 };
 
 /*
@@ -373,7 +396,7 @@ DubAPI.prototype.downdub = function(callback) {
 DubAPI.prototype.getMedia = function() {
     if (!this._.connected || !this._.room.play) return;
 
-    return this._.room.play.media.toNewObject();
+    return utils.clone(this._.room.play.media);
 };
 
 DubAPI.prototype.getScore = function() {
@@ -407,78 +430,82 @@ DubAPI.prototype.getTimeElapsed = function() {
 DubAPI.prototype.getUser = function(id) {
     if (!this._.connected) return;
 
-    var user = this._.room.getUser(id);
-
-    return user ? user.toNewObject() : user;
+    return utils.clone(this._.room.users.findWhere({id: id}));
 };
 
 DubAPI.prototype.getUserByName = function(username) {
     if (!this._.connected) return;
 
-    var user = this._.room.getUserByName(username);
-
-    return user ? user.toNewObject() : user;
+    return utils.clone(this._.room.users.findWhere({username: username}));
 };
 
 DubAPI.prototype.getSelf = function() {
     if (!this._.connected) return;
 
-    var user = this._.room.getUser(this._.self.id);
-
-    return user ? user.toNewObject() : user;
+    return utils.clone(this._.room.users.findWhere({id: this._.self.id}));
 };
 
 DubAPI.prototype.getCreator = function() {
     if (!this._.connected) return;
 
-    var user = this._.room.getCreator();
-
-    return user ? user.toNewObject() : user;
+    return utils.clone(this._.room.users.findWhere({id: this._.room.user}));
 };
 
 DubAPI.prototype.getDJ = function() {
     if (!this._.connected || !this._.room.play) return;
 
-    var user = this._.room.getDJ();
-
-    return user ? user.toNewObject() : user;
+    return utils.clone(this._.room.users.findWhere({id: this._.room.play.user}));
 };
 
 DubAPI.prototype.getUsers = function() {
     if (!this._.connected) return;
 
-    return this._.room.getUsers().map(function(userModel) {return userModel.toNewObject();});
-};
-
-DubAPI.prototype.getMods = function() {
-    if (!this._.connected) return;
-
-    return this._.room.getMods().map(function(userModel) {return userModel.toNewObject();});
+    return utils.clone(this._.room.users);
 };
 
 DubAPI.prototype.getStaff = function() {
     if (!this._.connected) return;
 
-    return this._.room.getStaff().map(function(userModel) {return userModel.toNewObject();});
+    return utils.clone(this._.room.users.filter(function(user) {return user.role !== null;}));
 };
 
 /*
- * Role Comparator Functions
+ * Role Functions
  */
 
-DubAPI.prototype.isMod = function(user) {
-    if (!this._.connected) return false;
-    return this._.room.isMod(user);
+DubAPI.prototype.isCreator = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.id === this._.room.user;
 };
 
-DubAPI.prototype.isCreator = function(user) {
-    if (!this._.connected) return false;
-    return this._.room.isCreator(user);
+DubAPI.prototype.isOwner = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['co-owner'].id;
+};
+
+DubAPI.prototype.isManager = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['manager'].id;
+};
+
+DubAPI.prototype.isMod = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['mod'].id;
+};
+
+DubAPI.prototype.isVIP = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['vip'].id;
+};
+
+DubAPI.prototype.isResidentDJ = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['resident-dj'].id;
 };
 
 DubAPI.prototype.isStaff = function(user) {
-    if (!this._.connected) return false;
-    return this._.room.isStaff(user);
+    if (!this._.connected || user === undefined) return false;
+    return user.role !== null;
 };
 
 module.exports = DubAPI;

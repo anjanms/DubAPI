@@ -336,16 +336,22 @@ DubAPI.prototype.moderateUnbanUser = function(id, callback) {
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatBan.replace('%UID%', id), form: form}, callback);
 };
 
-DubAPI.prototype.moderateKickUser = function(id, callback) {
+DubAPI.prototype.moderateKickUser = function(id, msg, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('kick')) return;
 
     var user = this._.room.users.findWhere({id: id});
     if (user && user.role !== null) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof msg === 'function') {
+        callback = msg;
+        msg = undefined;
+    }
 
-    var form = {realTimeChannel: this._.room.realTimeChannel};
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (['string', 'undefined'].indexOf(typeof msg) === -1) throw new TypeError('msg must be a string or undefined');
+
+    var form = {realTimeChannel: this._.room.realTimeChannel, message: msg ? utils.encodeHTMLEntities(msg) : ''};
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.chatKick.replace('%UID%', id), form: form}, callback);
 };

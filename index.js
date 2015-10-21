@@ -53,8 +53,6 @@ function DubAPI(auth, callback) {
     this._.self = undefined;
     this._.room = undefined;
 
-    this.reconnectOnKick = true;
-    this.preventSelfMute = true;
     this.mutedTriggerEvents = false;
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.authDubtrack, form: auth}, function(code, body) {

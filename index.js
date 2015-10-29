@@ -383,7 +383,7 @@ DubAPI.prototype.moderateUnmuteUser = function(id, callback) {
 
 DubAPI.prototype.moderateRemoveUserfromQueue = function(id, callback) {
     if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 

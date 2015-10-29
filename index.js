@@ -381,6 +381,17 @@ DubAPI.prototype.moderateUnmuteUser = function(id, callback) {
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute.replace('%UID%', id), form: form}, callback);
 };
 
+DubAPI.prototype.moderateRemoveUserfromQueue = function(id, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+
+    var form = {realTimeChannel: this._.room.realTimeChannel};
+
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemove.replace('%UID%', id), form: form}, callback);
+};
+
 /*
  * Media Functions
  */

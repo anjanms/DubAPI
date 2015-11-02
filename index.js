@@ -1,4 +1,3 @@
-
 var util = require('util'),
     eventEmitter = require('events').EventEmitter,
     pubnub = require('pubnub');
@@ -388,6 +387,76 @@ DubAPI.prototype.moderateRemoveDJ = function(id, callback) {
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemove.replace('%UID%', id)}, callback);
+};
+
+DubAPI.prototype.moderateSetRole = function(id, role, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof role !== 'number') throw new TypeError('role must be a number');
+
+    var uri;
+
+    switch (role) {
+      case 1:
+        uri = endpoints.setDJUser;
+        break;
+      case 2:
+        uri = endpoints.setVIPUser;
+        break;
+      case 3:
+        uri = endpoints.setModUser;
+        break;
+      case 4:
+        uri = endpoints.setManagerUser;
+        break;
+      case 5:
+        uri = endpoints.setOwnerUser;
+        break;
+      default:
+        throw new DubAPIError('role must be between 1 and 5');
+
+    }
+
+    var form = {realTimeChannel: this._.room.realTimeChannel};
+
+    this._.reqHandler.queue({method: 'POST', url: uri.replace('%UID%', id), form: form}, callback);
+};
+
+DubAPI.prototype.moderateUnsetRole = function(id, role, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof role !== 'number') throw new TypeError('role must be a number');
+
+    var uri;
+
+    switch (role) {
+      case 1:
+        uri = endpoints.setDJUser;
+        break;
+      case 2:
+        uri = endpoints.setVIPUser;
+        break;
+      case 3:
+        uri = endpoints.setModUser;
+        break;
+      case 4:
+        uri = endpoints.setManagerUser;
+        break;
+      case 5:
+        uri = endpoints.setOwnerUser;
+        break;
+      default:
+        throw new DubAPIError('role must be between 1 and 5');
+
+    }
+
+    var form = {realTimeChannel: this._.room.realTimeChannel};
+
+    this._.reqHandler.queue({method: 'DELETE', url: uri.replace('%UID%', id), form: form}, callback);
 };
 
 /*

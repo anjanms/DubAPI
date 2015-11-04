@@ -125,15 +125,19 @@ DubAPI.prototype._fetchMedia = function() {
 
             if (that._.room.play.id !== body.data.currentSong.id) return;
 
-            for (var i = 0; i < body.data.upDubs.length; i++) {
-                that._.room.play.dubs[body.data.upDubs[i].userid] = 'updub';
-                that._.room.users.findWhere({id: body.data.upDubs[i].userid}).set({dub: 'updub'});
-            }
+            body.data.upDubs.forEach(function(dub) {
+                that._.room.play.dubs[dub.userid] = 'updub';
 
-            for (var j = 0; j < body.data.downDubs.length; j++) {
-                that._.room.play.dubs[body.data.downDubs[j].userid] = 'downdub';
-                that._.room.users.findWhere({id: body.data.downDubs[j].userid}).set({dub: 'downdub'});
-            }
+                var user = that._.room.users.findWhere({id: dub.userid});
+                if (user) user.set({dub: 'updub'});
+            });
+
+            body.data.downDubs.forEach(function(dub) {
+                that._.room.play.dubs[dub.userid] = 'downdub';
+
+                var user = that._.room.users.findWhere({id: dub.userid});
+                if (user) user.set({dub: 'downdub'});
+            });
 
             that._.room.play.updubs = body.data.currentSong.updubs;
             that._.room.play.downdubs = body.data.currentSong.downdubs;

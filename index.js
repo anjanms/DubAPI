@@ -294,9 +294,10 @@ DubAPI.prototype.moderateSkip = function(callback) {
 
     if (this._.room.play.skipped) return;
 
-    var form = {realTimeChannel: this._.room.realTimeChannel};
+    var form = {realTimeChannel: this._.room.realTimeChannel},
+        uri = endpoints.chatSkip.replace('%PID%', this._.room.play.id);
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatSkip, form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: uri, form: form}, callback);
 };
 
 DubAPI.prototype.moderateDeleteChat = function(id, callback) {

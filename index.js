@@ -246,7 +246,7 @@ DubAPI.prototype.reconnect = function() {
 };
 
 DubAPI.prototype.getChatHistory = function() {
-    return utils.clone(this._.room.chat, true);
+    return utils.clone(this._.room.chat, {deep: true});
 };
 
 DubAPI.prototype.sendChat = function(message) {

@@ -284,6 +284,10 @@ DubAPI.prototype.sendChat = function(message) {
     sendNext();
 };
 
+DubAPI.prototype.getRoomMeta = function() {
+    return this._.room.getMeta();
+};
+
 /*
  * Moderation Functions
  */

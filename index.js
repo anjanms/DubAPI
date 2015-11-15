@@ -526,4 +526,13 @@ DubAPI.prototype.isStaff = function(user) {
     return user.role !== null;
 };
 
+/*
+ * Permission Functions
+ */
+
+DubAPI.prototype.hasPermission = function(user, permission) {
+    if (!this._.connected || user === undefined) return false;
+    return this._.room.users.findWhere({id: user.id}).hasPermission(permission);
+};
+
 module.exports = DubAPI;

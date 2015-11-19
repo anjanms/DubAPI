@@ -1,3 +1,4 @@
+
 var util = require('util'),
     eventEmitter = require('events').EventEmitter,
     pubnub = require('pubnub');
@@ -245,7 +246,7 @@ DubAPI.prototype.reconnect = function() {
 };
 
 DubAPI.prototype.getChatHistory = function() {
-    return utils.clone(this._.room.chat, true);
+    return utils.clone(this._.room.chat, {deep: true});
 };
 
 DubAPI.prototype.sendChat = function(message) {
@@ -281,6 +282,10 @@ DubAPI.prototype.sendChat = function(message) {
     }
 
     sendNext();
+};
+
+DubAPI.prototype.getRoomMeta = function() {
+    return this._.room.getMeta();
 };
 
 /*
@@ -405,11 +410,11 @@ DubAPI.prototype.moderateRemoveSong = function(id, callback) {
 
 DubAPI.prototype.moderateSetRole = function(id, role, callback) {
     if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-role')) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
     if (typeof role !== 'string') throw new TypeError('role must be a string');
-    if (roles.indexOf(role) === -1) throw new DubAPIError('role not found');
+    if (roles[role] === undefined) throw new DubAPIError('role not found');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
@@ -418,15 +423,61 @@ DubAPI.prototype.moderateSetRole = function(id, role, callback) {
 
 DubAPI.prototype.moderateUnsetRole = function(id, role, callback) {
   if (!this._.connected) return;
-  if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-role')) return;
+  if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
 
   if (typeof id !== 'string') throw new TypeError('id must be a string');
   if (typeof role !== 'string') throw new TypeError('role must be a string');
-  if (roles.indexOf(role) === -1) throw new DubAPIError('role not found');
+  if (roles[role] === undefined) throw new DubAPIError('role not found');
 
   var form = {realTimeChannel: this._.room.realTimeChannel};
 
   this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', id).replace('%ROLEID%', role), form: form}, callback);
+};
+
+/*
+ * Media Functions
+ */
+
+DubAPI.prototype.updub = function(callback) {
+    if (!this._.connected || !this._.room.play || this._.room.play.dubs[this._.self.id] === 'updub') return;
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistActiveDubs, form: {type: 'updub'}}, callback);
+};
+
+DubAPI.prototype.downdub = function(callback) {
+    if (!this._.connected || !this._.room.play || this._.room.play.dubs[this._.self.id] === 'downdub') return;
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistActiveDubs, form: {type: 'downdub'}}, callback);
+};
+
+DubAPI.prototype.getMedia = function() {
+    if (!this._.connected || !this._.room.play) return;
+
+    return utils.clone(this._.room.play.media);
+};
+
+DubAPI.prototype.getScore = function() {
+    if (!this._.connected || !this._.room.play) return;
+
+    return this._.room.play.getScore();
+};
+
+DubAPI.prototype.getPlayID = function() {
+    if (!this._.connected || !this._.room.play) return;
+
+    return this._.room.play.id;
+};
+
+DubAPI.prototype.getTimeRemaining = function() {
+    if (!this._.connected || !this._.room.play) return;
+
+    return this._.room.play.getTimeRemaining();
+};
+
+DubAPI.prototype.getTimeElapsed = function() {
+    if (!this._.connected || !this._.room.play) return;
+
+    return this._.room.play.getTimeElapsed();
 };
 
 /*
@@ -512,6 +563,15 @@ DubAPI.prototype.isResidentDJ = function(user) {
 DubAPI.prototype.isStaff = function(user) {
     if (!this._.connected || user === undefined) return false;
     return user.role !== null;
+};
+
+/*
+ * Permission Functions
+ */
+
+DubAPI.prototype.hasPermission = function(user, permission) {
+    if (!this._.connected || user === undefined) return false;
+    return this._.room.users.findWhere({id: user.id}).hasPermission(permission);
 };
 
 module.exports = DubAPI;

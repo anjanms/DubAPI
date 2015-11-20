@@ -396,7 +396,42 @@ DubAPI.prototype.moderateRemoveDJ = function(id, callback) {
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemove.replace('%UID%', id)}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveUser.replace('%UID%', id)}, callback);
+};
+
+DubAPI.prototype.moderateRemoveSong = function(id, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveSong.replace('%UID%', id)}, callback);
+};
+
+DubAPI.prototype.moderateSetRole = function(id, role, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof role !== 'string') throw new TypeError('role must be a string');
+    if (roles[role] === undefined) throw new DubAPIError('role not found');
+
+    var form = {realTimeChannel: this._.room.realTimeChannel};
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.setRole.replace('%UID%', id).replace('%ROLEID%', roles[role].id), form: form}, callback);
+};
+
+DubAPI.prototype.moderateUnsetRole = function(id, role, callback) {
+  if (!this._.connected) return;
+  if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
+
+  if (typeof id !== 'string') throw new TypeError('id must be a string');
+  if (typeof role !== 'string') throw new TypeError('role must be a string');
+  if (roles[role] === undefined) throw new DubAPIError('role not found');
+
+  var form = {realTimeChannel: this._.room.realTimeChannel};
+
+  this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', id).replace('%ROLEID%', role), form: form}, callback);
 };
 
 /*

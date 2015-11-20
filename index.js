@@ -6,9 +6,11 @@ var util = require('util'),
 var MediaModel = require('./lib/models/mediaModel.js'),
     PlayModel = require('./lib/models/playModel.js'),
     RoomModel = require('./lib/models/roomModel.js'),
+    SelfModel = require('./lib/models/selfModel.js'),
     UserModel = require('./lib/models/userModel.js');
 
 var RequestHandler = require('./lib/requestHandler.js'),
+    ActionHandler = require('./lib/actionHandler.js'),
     EventHandler = require('./lib/eventHandler.js');
 
 var DubAPIError = require('./lib/errors/error.js'),
@@ -19,16 +21,6 @@ var utils = require('./lib/utils.js'),
     roles = require('./lib/data/roles.js'),
     package = require('./package.json'),
     endpoints = require('./lib/data/endpoints.js');
-
-function formatSelf(data) {
-    data.id = data.userInfo.userid;
-
-    delete data.__v;
-    delete data._id;
-    delete data.userInfo;
-
-    return data;
-}
 
 function DubAPI(auth, callback) {
 
@@ -46,6 +38,7 @@ function DubAPI(auth, callback) {
     this._ = {};
 
     this._.connected = false;
+    this._.actHandler = new ActionHandler(this, auth);
     this._.reqHandler = new RequestHandler(this);
     this._.pubNub = undefined;
 
@@ -55,21 +48,16 @@ function DubAPI(auth, callback) {
 
     this.mutedTriggerEvents = false;
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.authDubtrack, form: auth}, function(code, body) {
-        if ([200, 400].indexOf(code) === -1) {
-            return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authDubtrack)));
-        } else if (code === 400) {
-            return callback(new DubAPIError('Authentication Failed: ' + body.data.details.message));
-        }
+    this._.actHandler.doLogin(function(err) {
+        if (err) return callback(err);
 
         that._.reqHandler.queue({method: 'GET', url: endpoints.authSession}, function(code, body) {
             if (code !== 200) return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authSession)));
 
-            that._.self = formatSelf(body.data);
+            that._.self = new SelfModel(body.data);
 
             that._.pubNub = pubnub({
                 backfill: false,
-                publish_key: '',
                 subscribe_key: 'sub-c-2b40f72a-6b59-11e3-ab46-02ee2ddab7fe',
                 ssl: true,
                 uuid: that._.self.id
@@ -85,76 +73,6 @@ util.inherits(DubAPI, eventEmitter);
 DubAPI.prototype.events = events;
 DubAPI.prototype.roles = roles;
 DubAPI.prototype.version = package.version;
-
-DubAPI.prototype._fetchMedia = function() {
-    var that = this;
-
-    that._.reqHandler.queue({method: 'GET', url: endpoints.roomPlaylistActive}, function(code, body) {
-        if ([200, 404].indexOf(code) === -1) {
-            return that.emit('error', new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.roomPlaylistActive)));
-        } else if (code === 404) {
-            that._.room.play = undefined;
-
-            that.emit('*', {type: events.roomPlaylistUpdate});
-            that.emit(events.roomPlaylistUpdate, {type: events.roomPlaylistUpdate});
-            return;
-        }
-
-        var raw = body.data;
-
-        that._.room.play = new PlayModel(body.data.song);
-        that._.room.play.media = new MediaModel(body.data.songInfo);
-
-        if (body.data.startTime * 1000 > that._.room.play.songLength) {
-            that._.room.play = undefined;
-
-            that.emit('*', {type: events.roomPlaylistUpdate});
-            that.emit(events.roomPlaylistUpdate, {type: events.roomPlaylistUpdate});
-            return;
-        }
-
-        clearTimeout(that._.room.playTimeout);
-        that._.room.playTimeout = setTimeout(that._fetchMedia.bind(that), that._.room.play.getTimeRemaining() + 15000);
-
-        that._.reqHandler.queue({method: 'GET', url: endpoints.roomPlaylistActiveDubs}, function(code, body) {
-            if (code !== 200) {
-                return that.emit('error', new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.roomPlaylistActiveDubs)));
-            }
-
-            body.data.currentSong = new PlayModel(body.data.currentSong);
-
-            if (that._.room.play.id !== body.data.currentSong.id) return;
-
-            body.data.upDubs.forEach(function(dub) {
-                that._.room.play.dubs[dub.userid] = 'updub';
-
-                var user = that._.room.users.findWhere({id: dub.userid});
-                if (user) user.set({dub: 'updub'});
-            });
-
-            body.data.downDubs.forEach(function(dub) {
-                that._.room.play.dubs[dub.userid] = 'downdub';
-
-                var user = that._.room.users.findWhere({id: dub.userid});
-                if (user) user.set({dub: 'downdub'});
-            });
-
-            that._.room.play.updubs = body.data.currentSong.updubs;
-            that._.room.play.downdubs = body.data.currentSong.downdubs;
-
-            var event = {};
-
-            event.raw = raw;
-            event.media = utils.clone(that._.room.play.media);
-            event.user = utils.clone(that._.room.users.findWhere({id: that._.room.play.user}));
-            event.id = that._.room.play.id;
-            event.type = events.roomPlaylistUpdate;
-
-            that.emit('*', event);
-            that.emit(events.roomPlaylistUpdate, event);
-        });
-    });
-};
 
 /*
  * External Functions
@@ -203,7 +121,7 @@ DubAPI.prototype.connect = function(slug) {
                     that._.room.users.add(userModel);
                 });
 
-                that._fetchMedia();
+                that._.actHandler.updatePlay();
 
                 that._.connected = true;
                 that.emit('connected', that._.room.name);

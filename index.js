@@ -180,26 +180,17 @@ DubAPI.prototype.sendChat = function(message) {
 
     message = message.match(/(.{1,140})(?:\s|$)|(.{1,140})/g);
 
-    var i = 0;
+    var body = {};
 
-    var that = this;
+    body.type = 'chat-message';
+    body.realTimeChannel = this._.room.realTimeChannel;
 
-    function sendNext() {
-        if (i >= message.length) return;
+    for (var i = 0; i < message.length; i++) {
+        body.time = Date.now();
+        body.message = message[i];
 
-        var body = {
-            message: message[i],
-            realTimeChannel: that._.room.realTimeChannel,
-            time: Date.now(),
-            type: 'chat-message'
-        };
-
-        i++;
-
-        that._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: body, isChat: true}, sendNext);
+        this._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: utils.clone(body), isChat: true});
     }
-
-    sendNext();
 };
 
 DubAPI.prototype.getRoomMeta = function() {

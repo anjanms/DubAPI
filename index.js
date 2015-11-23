@@ -196,7 +196,7 @@ DubAPI.prototype.sendChat = function(message) {
 
         i++;
 
-        that._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: body, sync: true}, sendNext);
+        that._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: body, isChat: true}, sendNext);
     }
 
     sendNext();

@@ -122,6 +122,7 @@ DubAPI.prototype.connect = function(slug) {
                 });
 
                 that._.actHandler.updatePlay();
+                that._.actHandler.updateQueue();
 
                 that._.connected = true;
                 that.emit('connected', that._.room.name);
@@ -195,6 +196,12 @@ DubAPI.prototype.sendChat = function(message) {
 
 DubAPI.prototype.getRoomMeta = function() {
     return this._.room.getMeta();
+};
+
+DubAPI.prototype.getQueue = function() {
+    if (!this._.connected) return [];
+
+    return utils.clone(this._.room.queue, {deep: true});
 };
 
 /*

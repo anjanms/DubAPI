@@ -310,6 +310,24 @@ DubAPI.prototype.moderateUnmuteUser = function(id, callback) {
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute.replace('%UID%', id), form: form}, callback);
 };
 
+DubAPI.prototype.moderateMoveDJ = function(id, position, callback) {
+    if (!this._.connected) return;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
+
+    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof position !== 'number') throw new TypeError('position must be a number');
+
+    var queue = this._.room.queue.map(function(queueItem) {return queueItem.user.id;}),
+        index = queue.indexOf(id);
+
+    if (index === -1) throw new DubAPIError('user not in queue');
+    if (position < 0 || position >= queue.length) throw new RangeError('position out of range');
+
+    queue.splice(position, 0, queue.splice(index, 1)[0]);
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomQueueOrder, form: {order: queue}}, callback);
+};
+
 DubAPI.prototype.moderateRemoveDJ = function(id, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;

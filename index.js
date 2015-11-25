@@ -164,10 +164,6 @@ DubAPI.prototype.reconnect = function() {
     this.connect(slug);
 };
 
-DubAPI.prototype.getChatHistory = function() {
-    return utils.clone(this._.room.chat, {deep: true});
-};
-
 DubAPI.prototype.sendChat = function(message) {
     if (!this._.connected) return;
 
@@ -194,7 +190,15 @@ DubAPI.prototype.sendChat = function(message) {
     }
 };
 
+DubAPI.prototype.getChatHistory = function() {
+    if (!this._.connected) return [];
+
+    return utils.clone(this._.room.chat, {deep: true});
+};
+
 DubAPI.prototype.getRoomMeta = function() {
+    if (!this._.connected) return;
+
     return this._.room.getMeta();
 };
 
@@ -385,13 +389,13 @@ DubAPI.prototype.getPlayID = function() {
 };
 
 DubAPI.prototype.getTimeRemaining = function() {
-    if (!this._.connected || !this._.room.play) return;
+    if (!this._.connected || !this._.room.play) return -1;
 
     return this._.room.play.getTimeRemaining();
 };
 
 DubAPI.prototype.getTimeElapsed = function() {
-    if (!this._.connected || !this._.room.play) return;
+    if (!this._.connected || !this._.room.play) return -1;
 
     return this._.room.play.getTimeElapsed();
 };
@@ -431,13 +435,13 @@ DubAPI.prototype.getDJ = function() {
 };
 
 DubAPI.prototype.getUsers = function() {
-    if (!this._.connected) return;
+    if (!this._.connected) return [];
 
     return utils.clone(this._.room.users);
 };
 
 DubAPI.prototype.getStaff = function() {
-    if (!this._.connected) return;
+    if (!this._.connected) return [];
 
     return utils.clone(this._.room.users.filter(function(user) {return user.role !== null;}));
 };

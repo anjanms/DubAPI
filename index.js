@@ -208,6 +208,12 @@ DubAPI.prototype.getQueue = function() {
     return utils.clone(this._.room.queue, {deep: true});
 };
 
+DubAPI.prototype.getQueuePosition = function(id) {
+    if (!this._.connected) return -1;
+
+    return this._.room.queue.indexWhere({uid: id});
+};
+
 /*
  * Moderation Functions
  */
@@ -317,11 +323,14 @@ DubAPI.prototype.moderateMoveDJ = function(id, position, callback) {
     if (typeof id !== 'string') throw new TypeError('id must be a string');
     if (typeof position !== 'number') throw new TypeError('position must be a number');
 
-    var queue = this._.room.queue.map(function(queueItem) {return queueItem.user.id;}),
-        index = queue.indexOf(id);
+    var index = this._.room.queue.indexWhere({uid: id});
 
-    if (index === -1) throw new DubAPIError('user not in queue');
-    if (position < 0 || position >= queue.length) throw new RangeError('position out of range');
+    if (position < 0) position = 0;
+    else if (position >= this._.room.queue.length) position = this._.room.queue.length - 1;
+
+    if (index === position || index === -1) return;
+
+    var queue = this._.room.queue.map(function(queueItem) {return queueItem.uid;});
 
     queue.splice(position, 0, queue.splice(index, 1)[0]);
 
@@ -334,6 +343,8 @@ DubAPI.prototype.moderateRemoveDJ = function(id, callback) {
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
 
+    if (this._.room.queue.indexWhere({uid: id}) === -1) return;
+
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveUser.replace('%UID%', id)}, callback);
 };
 
@@ -342,6 +353,8 @@ DubAPI.prototype.moderateRemoveSong = function(id, callback) {
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
 
     if (typeof id !== 'string') throw new TypeError('id must be a string');
+
+    if (this._.room.queue.indexWhere({uid: id}) === -1) return;
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveSong.replace('%UID%', id)}, callback);
 };

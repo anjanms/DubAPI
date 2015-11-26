@@ -208,10 +208,10 @@ DubAPI.prototype.getQueue = function() {
     return utils.clone(this._.room.queue, {deep: true});
 };
 
-DubAPI.prototype.getQueuePosition = function(id) {
+DubAPI.prototype.getQueuePosition = function(uid) {
     if (!this._.connected) return -1;
 
-    return this._.room.queue.indexWhere({uid: id});
+    return this._.room.queue.indexWhere({uid: uid});
 };
 
 /*
@@ -230,20 +230,20 @@ DubAPI.prototype.moderateSkip = function(callback) {
     this._.reqHandler.queue({method: 'POST', url: uri, form: form}, callback);
 };
 
-DubAPI.prototype.moderateDeleteChat = function(id, callback) {
+DubAPI.prototype.moderateDeleteChat = function(cid, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('delete-chat')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof cid !== 'string') throw new TypeError('cid must be a string');
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatDelete.replace('%CID%', id)}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatDelete.replace('%CID%', cid)}, callback);
 };
 
-DubAPI.prototype.moderateBanUser = function(id, time, callback) {
+DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return;
 
-    var user = this._.room.users.findWhere({id: id});
+    var user = this._.room.users.findWhere({id: uid});
     if (user && user.role !== null) return;
 
     if (typeof time === 'function') {
@@ -251,31 +251,31 @@ DubAPI.prototype.moderateBanUser = function(id, time, callback) {
         time = undefined;
     }
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (['number', 'undefined'].indexOf(typeof time) === -1) throw new TypeError('time must be undefined or a number');
     if (time && time < 0) throw new RangeError('time must be zero or greater');
 
     var form = {realTimeChannel: this._.room.realTimeChannel, time: time ? time : 0};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatBan.replace('%UID%', id), form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.chatBan.replace('%UID%', uid), form: form}, callback);
 };
 
-DubAPI.prototype.moderateUnbanUser = function(id, callback) {
+DubAPI.prototype.moderateUnbanUser = function(uid, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatBan.replace('%UID%', id), form: form}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatBan.replace('%UID%', uid), form: form}, callback);
 };
 
-DubAPI.prototype.moderateKickUser = function(id, msg, callback) {
+DubAPI.prototype.moderateKickUser = function(uid, msg, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('kick')) return;
 
-    var user = this._.room.users.findWhere({id: id});
+    var user = this._.room.users.findWhere({id: uid});
     if (user && user.role !== null) return;
 
     if (typeof msg === 'function') {
@@ -283,47 +283,47 @@ DubAPI.prototype.moderateKickUser = function(id, msg, callback) {
         msg = undefined;
     }
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (['string', 'undefined'].indexOf(typeof msg) === -1) throw new TypeError('msg must be a string or undefined');
 
     var form = {realTimeChannel: this._.room.realTimeChannel, message: msg ? utils.encodeHTMLEntities(msg) : ''};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatKick.replace('%UID%', id), form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.chatKick.replace('%UID%', uid), form: form}, callback);
 };
 
-DubAPI.prototype.moderateMuteUser = function(id, callback) {
+DubAPI.prototype.moderateMuteUser = function(uid, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
 
-    var user = this._.room.users.findWhere({id: id});
+    var user = this._.room.users.findWhere({id: uid});
     if (user && user.role !== null) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.chatMute.replace('%UID%', id), form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.chatMute.replace('%UID%', uid), form: form}, callback);
 };
 
-DubAPI.prototype.moderateUnmuteUser = function(id, callback) {
+DubAPI.prototype.moderateUnmuteUser = function(uid, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute.replace('%UID%', id), form: form}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute.replace('%UID%', uid), form: form}, callback);
 };
 
-DubAPI.prototype.moderateMoveDJ = function(id, position, callback) {
+DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (typeof position !== 'number') throw new TypeError('position must be a number');
 
-    var index = this._.room.queue.indexWhere({uid: id});
+    var index = this._.room.queue.indexWhere({uid: uid});
 
     if (position < 0) position = 0;
     else if (position >= this._.room.queue.length) position = this._.room.queue.length - 1;
@@ -337,52 +337,52 @@ DubAPI.prototype.moderateMoveDJ = function(id, position, callback) {
     this._.reqHandler.queue({method: 'POST', url: endpoints.roomQueueOrder, form: {order: queue}}, callback);
 };
 
-DubAPI.prototype.moderateRemoveDJ = function(id, callback) {
+DubAPI.prototype.moderateRemoveDJ = function(uid, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
-    if (this._.room.queue.indexWhere({uid: id}) === -1) return;
+    if (this._.room.queue.indexWhere({uid: uid}) === -1) return;
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveUser.replace('%UID%', id)}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveUser.replace('%UID%', uid)}, callback);
 };
 
-DubAPI.prototype.moderateRemoveSong = function(id, callback) {
+DubAPI.prototype.moderateRemoveSong = function(uid, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
-    if (this._.room.queue.indexWhere({uid: id}) === -1) return;
+    if (this._.room.queue.indexWhere({uid: uid}) === -1) return;
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveSong.replace('%UID%', id)}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveSong.replace('%UID%', uid)}, callback);
 };
 
-DubAPI.prototype.moderateSetRole = function(id, role, callback) {
+DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
     if (!this._.connected) return;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
 
-    if (typeof id !== 'string') throw new TypeError('id must be a string');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (typeof role !== 'string') throw new TypeError('role must be a string');
     if (roles[role] === undefined) throw new DubAPIError('role not found');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.setRole.replace('%UID%', id).replace('%ROLEID%', roles[role].id), form: form}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', roles[role].id), form: form}, callback);
 };
 
-DubAPI.prototype.moderateUnsetRole = function(id, role, callback) {
+DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
   if (!this._.connected) return;
   if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
 
-  if (typeof id !== 'string') throw new TypeError('id must be a string');
+  if (typeof uid !== 'string') throw new TypeError('uid must be a string');
   if (typeof role !== 'string') throw new TypeError('role must be a string');
   if (roles[role] === undefined) throw new DubAPIError('role not found');
 
   var form = {realTimeChannel: this._.room.realTimeChannel};
 
-  this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', id).replace('%ROLEID%', role), form: form}, callback);
+  this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role), form: form}, callback);
 };
 
 /*
@@ -435,10 +435,10 @@ DubAPI.prototype.getTimeElapsed = function() {
  * User Functions
  */
 
-DubAPI.prototype.getUser = function(id) {
+DubAPI.prototype.getUser = function(uid) {
     if (!this._.connected) return;
 
-    return utils.clone(this._.room.users.findWhere({id: id}));
+    return utils.clone(this._.room.users.findWhere({id: uid}));
 };
 
 DubAPI.prototype.getUserByName = function(username) {

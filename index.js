@@ -252,7 +252,7 @@ DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
     }
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
-    if (['number', 'undefined'].indexOf(typeof time) === -1) throw new TypeError('time must be undefined or a number');
+    if (time !== undefined && !Number.isInteger(time)) throw new TypeError('time must be undefined or an integer');
     if (time && time < 0) throw new RangeError('time must be zero or greater');
 
     var form = {realTimeChannel: this._.room.realTimeChannel, time: time ? time : 0};
@@ -321,7 +321,7 @@ DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
-    if (typeof position !== 'number') throw new TypeError('position must be a number');
+    if (!Number.isInteger(position)) throw new TypeError('position must be an integer');
 
     var index = this._.room.queue.indexWhere({uid: uid});
 

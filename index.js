@@ -219,32 +219,33 @@ DubAPI.prototype.getQueuePosition = function(uid) {
  */
 
 DubAPI.prototype.moderateSkip = function(callback) {
-    if (!this._.connected || !this._.room.play) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('skip')) return;
+    if (!this._.connected || !this._.room.play) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('skip')) return false;
 
-    if (this._.room.play.skipped) return;
+    if (this._.room.play.skipped) return false;
 
     var form = {realTimeChannel: this._.room.realTimeChannel},
         uri = endpoints.chatSkip.replace('%PID%', this._.room.play.id);
 
     this._.reqHandler.queue({method: 'POST', url: uri, form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateDeleteChat = function(cid, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('delete-chat')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('delete-chat')) return false;
 
     if (typeof cid !== 'string') throw new TypeError('cid must be a string');
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatDelete.replace('%CID%', cid)}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return;
-
-    var user = this._.room.users.findWhere({id: uid});
-    if (user && user.role !== null) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return false;
 
     if (typeof time === 'function') {
         callback = time;
@@ -255,28 +256,32 @@ DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
     if (time !== undefined && !Number.isInteger(time)) throw new TypeError('time must be undefined or an integer');
     if (time && time < 0) throw new RangeError('time must be zero or greater');
 
+    var user = this._.room.users.findWhere({id: uid});
+    if (user && user.role !== null) return false;
+
     var form = {realTimeChannel: this._.room.realTimeChannel, time: time ? time : 0};
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.chatBan.replace('%UID%', uid), form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateUnbanUser = function(uid, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatBan.replace('%UID%', uid), form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateKickUser = function(uid, msg, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('kick')) return;
-
-    var user = this._.room.users.findWhere({id: uid});
-    if (user && user.role !== null) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('kick')) return false;
 
     if (typeof msg === 'function') {
         callback = msg;
@@ -286,39 +291,48 @@ DubAPI.prototype.moderateKickUser = function(uid, msg, callback) {
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (['string', 'undefined'].indexOf(typeof msg) === -1) throw new TypeError('msg must be a string or undefined');
 
+    var user = this._.room.users.findWhere({id: uid});
+    if (user && user.role !== null) return false;
+
     var form = {realTimeChannel: this._.room.realTimeChannel, message: msg ? utils.encodeHTMLEntities(msg) : ''};
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.chatKick.replace('%UID%', uid), form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateMuteUser = function(uid, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
-
-    var user = this._.room.users.findWhere({id: uid});
-    if (user && user.role !== null) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
+
+    var user = this._.room.users.findWhere({id: uid});
+    if (user && user.role !== null) return false;
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.chatMute.replace('%UID%', uid), form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateUnmuteUser = function(uid, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.chatMute.replace('%UID%', uid), form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (!Number.isInteger(position)) throw new TypeError('position must be an integer');
@@ -328,40 +342,46 @@ DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
     if (position < 0) position = 0;
     else if (position >= this._.room.queue.length) position = this._.room.queue.length - 1;
 
-    if (index === position || index === -1) return;
+    if (index === position || index === -1) return false;
 
     var queue = this._.room.queue.map(function(queueItem) {return queueItem.uid;});
 
     queue.splice(position, 0, queue.splice(index, 1)[0]);
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.roomQueueOrder, form: {order: queue}}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateRemoveDJ = function(uid, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
-    if (this._.room.queue.indexWhere({uid: uid}) === -1) return;
+    if (this._.room.queue.indexWhere({uid: uid}) === -1) return false;
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveUser.replace('%UID%', uid)}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateRemoveSong = function(uid, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
-    if (this._.room.queue.indexWhere({uid: uid}) === -1) return;
+    if (this._.room.queue.indexWhere({uid: uid}) === -1) return false;
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomQueueRemoveSong.replace('%UID%', uid)}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
-    if (!this._.connected) return;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (typeof role !== 'string') throw new TypeError('role must be a string');
@@ -370,11 +390,13 @@ DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
     this._.reqHandler.queue({method: 'POST', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', roles[role].id), form: form}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
-  if (!this._.connected) return;
-  if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return;
+  if (!this._.connected) return false;
+  if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return false;
 
   if (typeof uid !== 'string') throw new TypeError('uid must be a string');
   if (typeof role !== 'string') throw new TypeError('role must be a string');
@@ -383,6 +405,8 @@ DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
   var form = {realTimeChannel: this._.room.realTimeChannel};
 
   this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role), form: form}, callback);
+
+  return true;
 };
 
 /*

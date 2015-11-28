@@ -1,3 +1,4 @@
+'use strict';
 
 var util = require('util'),
     eventEmitter = require('events').EventEmitter,
@@ -16,10 +17,10 @@ var RequestHandler = require('./lib/requestHandler.js'),
 var DubAPIError = require('./lib/errors/error.js'),
     DubAPIRequestError = require('./lib/errors/requestError.js');
 
-var utils = require('./lib/utils.js'),
+var pkg = require('./package.json'),
+    utils = require('./lib/utils.js'),
     events = require('./lib/data/events.js'),
     roles = require('./lib/data/roles.js'),
-    package = require('./package.json'),
     endpoints = require('./lib/data/endpoints.js');
 
 function DubAPI(auth, callback) {
@@ -72,7 +73,7 @@ util.inherits(DubAPI, eventEmitter);
 
 DubAPI.prototype.events = events;
 DubAPI.prototype.roles = roles;
-DubAPI.prototype.version = package.version;
+DubAPI.prototype.version = pkg.version;
 
 /*
  * External Functions

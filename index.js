@@ -4,9 +4,7 @@ var util = require('util'),
     eventEmitter = require('events').EventEmitter,
     pubnub = require('pubnub');
 
-var MediaModel = require('./lib/models/mediaModel.js'),
-    PlayModel = require('./lib/models/playModel.js'),
-    RoomModel = require('./lib/models/roomModel.js'),
+var RoomModel = require('./lib/models/roomModel.js'),
     SelfModel = require('./lib/models/selfModel.js'),
     UserModel = require('./lib/models/userModel.js');
 
@@ -24,7 +22,6 @@ var pkg = require('./package.json'),
     endpoints = require('./lib/data/endpoints.js');
 
 function DubAPI(auth, callback) {
-
     if (typeof auth !== 'object') throw new TypeError('auth must be an object');
 
     if (typeof auth.username !== 'string') throw new TypeError('auth.username must be a string');
@@ -59,7 +56,7 @@ function DubAPI(auth, callback) {
 
             that._.pubNub = pubnub({
                 backfill: false,
-                subscribe_key: 'sub-c-2b40f72a-6b59-11e3-ab46-02ee2ddab7fe',
+                subscribe_key: 'sub-c-2b40f72a-6b59-11e3-ab46-02ee2ddab7fe', //eslint-disable-line camelcase
                 ssl: true,
                 uuid: that._.self.id
             });
@@ -141,7 +138,7 @@ DubAPI.prototype.disconnect = function() {
         clearTimeout(this._.room.playTimeout);
 
         this._.pubNub.unsubscribe({
-            channel: this._.room.realTimeChannel,
+            channel: this._.room.realTimeChannel
         });
 
         this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomUsers});
@@ -396,18 +393,18 @@ DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
 };
 
 DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
-  if (!this._.connected) return false;
-  if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return false;
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return false;
 
-  if (typeof uid !== 'string') throw new TypeError('uid must be a string');
-  if (typeof role !== 'string') throw new TypeError('role must be a string');
-  if (roles[role] === undefined) throw new DubAPIError('role not found');
+    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
+    if (typeof role !== 'string') throw new TypeError('role must be a string');
+    if (roles[role] === undefined) throw new DubAPIError('role not found');
 
-  var form = {realTimeChannel: this._.room.realTimeChannel};
+    var form = {realTimeChannel: this._.room.realTimeChannel};
 
-  this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role), form: form}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role), form: form}, callback);
 
-  return true;
+    return true;
 };
 
 /*

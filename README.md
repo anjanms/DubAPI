@@ -1,4 +1,4 @@
-# DubAPI
+# DubAPI [![][buildbadge]][buildlink] [![][depbadge]][deplink] [![][npmbadge]][npmlink] [![][licbadge]][liclink]
 
 ## About
 
@@ -7,7 +7,7 @@ A NodeJS API for creating dubtrack.fm bots.
 ## Usage
 
 ```
-npm install git+https://github.com/anjanms/DubAPI
+npm install dubapi
 ```
 
 ```javascript
@@ -46,3 +46,15 @@ new DubAPI({username: '', password: ''}, function(err, bot) {
 ## Credit
 
 - Design cues taken from [PlugAPI](https://github.com/plugCubed/plugAPI)
+
+[buildlink]: https://travis-ci.org/anjanms/DubAPI
+[buildbadge]: https://img.shields.io/travis/anjanms/DubAPI.svg "Build Status"
+
+[deplink]: https://david-dm.org/anjanms/DubAPI
+[depbadge]: https://img.shields.io/david/anjanms/DubAPI.svg "Dependency Status"
+
+[npmlink]: https://www.npmjs.com/package/dubapi
+[npmbadge]: https://img.shields.io/npm/v/dubapi.svg "npm version"
+
+[liclink]: https://github.com/anjanms/DubAPI/blob/master/LICENSE.md
+[licbadge]: https://img.shields.io/npm/l/dubapi.svg "License"

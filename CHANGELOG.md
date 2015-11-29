@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.1] - 2015-11-29
+### Fixed
+- Fixed a crash in moderateBanUser and moderateMoveUser on node 0.10
+
 ## [1.0.0] - 2015-11-29
 ### Added
 - Added moderateSetRole and moderateUnsetRole methods from @Fuechschen
@@ -24,4 +28,5 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.0.1]: https://github.com/anjanms/DubAPI/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/anjanms/DubAPI/compare/0.2.4...v1.0.0

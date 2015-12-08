@@ -414,13 +414,13 @@ DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
 DubAPI.prototype.updub = function(callback) {
     if (!this._.connected || !this._.room.play || this._.room.play.dubs[this._.self.id] === 'updub') return;
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistActiveDubs, form: {type: 'updub'}}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id), form: {type: 'updub'}}, callback);
 };
 
 DubAPI.prototype.downdub = function(callback) {
     if (!this._.connected || !this._.room.play || this._.room.play.dubs[this._.self.id] === 'downdub') return;
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistActiveDubs, form: {type: 'downdub'}}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id), form: {type: 'downdub'}}, callback);
 };
 
 DubAPI.prototype.getMedia = function() {

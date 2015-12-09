@@ -1,6 +1,6 @@
 {
     "name": "dubapi",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A NodeJS module for creating dubtrack.fm bots",
     "main": "index.js",
     "author": "anjanms",

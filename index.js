@@ -173,7 +173,7 @@ DubAPI.prototype.sendChat = function(message) {
 
     message = utils.encodeHTMLEntities(message);
 
-    message = message.match(/(.{1,140})(?:\s|$)|(.{1,140})/g);
+    message = message.match(/(.{1,255})(?:\s|$)|(.{1,255})/g);
 
     var body = {};
 

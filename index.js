@@ -45,6 +45,7 @@ function DubAPI(auth, callback) {
     this._.room = undefined;
 
     this.mutedTriggerEvents = false;
+    this.maxChatMessageSplits = 1;
 
     this._.actHandler.doLogin(function(err) {
         if (err) return callback(err);
@@ -185,6 +186,8 @@ DubAPI.prototype.sendChat = function(message) {
         body.message = message[i];
 
         this._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: utils.clone(body), isChat: true});
+
+        if (i >= this.maxChatMessageSplits) break;
     }
 };
 

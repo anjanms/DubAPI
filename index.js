@@ -57,6 +57,7 @@ function DubAPI(auth, callback) {
 
             that._.pubNub = pubnub({
                 backfill: false,
+                restore: false,
                 subscribe_key: 'sub-c-2b40f72a-6b59-11e3-ab46-02ee2ddab7fe', //eslint-disable-line camelcase
                 ssl: true,
                 uuid: that._.self.id
@@ -92,13 +93,17 @@ DubAPI.prototype.connect = function(slug) {
 
         that._.room = new RoomModel(body.data);
 
-        that._.pubNub.subscribe({
-            channel: that._.room.realTimeChannel,
-            callback: EventHandler.bind(that),
-            connect: that.emit.bind(that, 'pubnub:connect'),
-            reconnect: that.emit.bind(that, 'pubnub:reconnect'),
-            disconnect: that.emit.bind(that, 'pubnub:disconnect'),
-            error: that.emit.bind(that, 'error')
+        that._.pubNub.time(function(currentTime) {
+            that._.pubNub.subscribe({
+                channel: that._.room.realTimeChannel,
+                callback: utils.bind(EventHandler, that),
+                connect: that.emit.bind(that, 'pubnub:connect'),
+                reconnect: that.emit.bind(that, 'pubnub:reconnect'),
+                disconnect: that.emit.bind(that, 'pubnub:disconnect'),
+                //Restore gets overridden after an unsubscribe in PubNub 3.7.18
+                //Pass in the current PubNub time to only fetch messages since now
+                timetoken: currentTime
+            });
         });
 
         that._.reqHandler.queue({method: 'POST', url: endpoints.roomUsers}, function(code, body) {

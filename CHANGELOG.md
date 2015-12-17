@@ -1,5 +1,22 @@
 # Change Log
 
+## [1.1.0] - 2015-12-14
+### Added
+- Added option to limit chat message splits
+- Added automatic re-join when the bot erroneously leaves the room
+
+### Changed
+- Changed max chat message length to 255
+
+### Fixed
+- Fixed users still in the cache not being re-added to the collection
+- Fixed old events being processed when the bot reconnects
+- Fixed internal models accidentally being exposed to event listeners
+- Fixed a crash when the bot disconnects and still has requests queued
+
+### Removed
+- Removed `chatid` property with duplicate value from `delete-chat-message` event (use `id` instead)
+
 ## [1.0.3] - 2015-12-08
 ### Added
 - Added updating of usernames on chat-message event [#10](https://github.com/anjanms/DubAPI/issues/10)
@@ -9,8 +26,8 @@
 
 ## [1.0.2] - 2015-12-01
 ### Fixed
-- Fixed a crash caused by song being undefined in responses from ```room/%RID%/playlist/active``` [#8](https://github.com/anjanms/DubAPI/issues/8)
-- Fixed a crash caused by the array containing null in responses from ```room/%RID%/playlist/details``` [#8](https://github.com/anjanms/DubAPI/issues/8)
+- Fixed a crash caused by song being undefined in responses from `room/%RID%/playlist/active` [#8](https://github.com/anjanms/DubAPI/issues/8)
+- Fixed a crash caused by the array containing null in responses from `room/%RID%/playlist/details` [#8](https://github.com/anjanms/DubAPI/issues/8)
 
 ## [1.0.1] - 2015-11-29
 ### Fixed
@@ -40,6 +57,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.1.0]: https://github.com/anjanms/DubAPI/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/anjanms/DubAPI/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/anjanms/DubAPI/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/anjanms/DubAPI/compare/v1.0.0...v1.0.1

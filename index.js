@@ -140,6 +140,8 @@ DubAPI.prototype.disconnect = function() {
 
     var name = this._.room ? this._.room.name : undefined;
 
+    this._.reqHandler.clear();
+
     if (this._.room) {
         clearTimeout(this._.room.playTimeout);
 

@@ -433,6 +433,12 @@ DubAPI.prototype.downdub = function(callback) {
     this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id), form: {type: 'downdub'}}, callback);
 };
 
+DubAPI.prototype.getDubs = function() {
+    if (!this._.connected || !this._.room.play) return;
+
+    return this._.room.play.dubs;
+};
+
 DubAPI.prototype.getMedia = function() {
     if (!this._.connected || !this._.room.play) return;
 

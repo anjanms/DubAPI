@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.1] - 2016-01-17
+### Changed
+- Changed media objects to be undefined when missing `type` or `fkid` [#16](https://github.com/anjanms/DubAPI/issues/16)
+
 ## [1.2.0] - 2016-01-13
 ### Added
 - Added support for grabs
@@ -64,6 +68,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.2.1]: https://github.com/anjanms/DubAPI/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/anjanms/DubAPI/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/anjanms/DubAPI/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/anjanms/DubAPI/compare/v1.0.2...v1.0.3

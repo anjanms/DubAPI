@@ -417,19 +417,19 @@ DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
     return true;
 };
 
-DubAPI.prototype.moderateLockQueue = function(locked, callback){
+DubAPI.prototype.moderateLockQueue = function(locked, callback) {
     if (!this._.connected) return false;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('lock-queue')) return false;
 
-    if(typeof locked !== 'boolean') throw new TypeError('locked must be a boolean');
+    if (typeof locked !== 'boolean') throw new TypeError('locked must be a boolean');
 
     var form = {lockQueue: 0};
-    if(locked) form.lockQueue = 1;
+    if (locked) form.lockQueue = 1;
 
     this._.reqHandler.queue({method: 'PUT', url: endpoints.lockQueue, form: form}, callback);
 
     return true;
-}
+};
 
 /*
  * Media Functions

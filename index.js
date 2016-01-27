@@ -421,6 +421,8 @@ DubAPI.prototype.moderateLockQueue = function(locked, callback) {
     if (!this._.connected) return false;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('lock-queue')) return false;
 
+    if (this._.room.lockQueue === locked) return false;
+
     if (typeof locked !== 'boolean') throw new TypeError('locked must be a boolean');
 
     var form = {lockQueue: 0};

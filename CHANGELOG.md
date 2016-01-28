@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.3.0] - 2016-01-27
+### Added
+- Added user profileImage support
+- Added `user-update` event for profileImage updates
+- Added moderateLockQueue [#19](https://github.com/anjanms/DubAPI/pull/19) ([@Fuechschen](https://github.com/Fuechschen))
+- Added support for case-insensitive matching in getUserByName [#18](https://github.com/anjanms/DubAPI/issues/18)
+
+### Changed
+- Changed existing `user-update` event to `user_update` to match dubtrack
+
 ## [1.2.1] - 2016-01-17
 ### Changed
 - Changed media objects to be undefined when missing `type` or `fkid` [#16](https://github.com/anjanms/DubAPI/issues/16)
@@ -68,6 +78,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.3.0]: https://github.com/anjanms/DubAPI/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/anjanms/DubAPI/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/anjanms/DubAPI/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/anjanms/DubAPI/compare/v1.0.3...v1.1.0

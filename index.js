@@ -421,6 +421,8 @@ DubAPI.prototype.moderateLockQueue = function(locked, callback) {
     if (!this._.connected) return false;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('lock-queue')) return false;
 
+    if (this._.room.lockQueue === locked) return false;
+
     if (typeof locked !== 'boolean') throw new TypeError('locked must be a boolean');
 
     var form = {lockQueue: 0};
@@ -487,10 +489,10 @@ DubAPI.prototype.getUser = function(uid) {
     return utils.clone(this._.room.users.findWhere({id: uid}));
 };
 
-DubAPI.prototype.getUserByName = function(username) {
+DubAPI.prototype.getUserByName = function(username, ignoreCase) {
     if (!this._.connected) return;
 
-    return utils.clone(this._.room.users.findWhere({username: username}));
+    return utils.clone(this._.room.users.findWhere({username: username}, {ignoreCase: ignoreCase}));
 };
 
 DubAPI.prototype.getSelf = function() {

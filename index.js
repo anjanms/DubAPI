@@ -618,7 +618,7 @@ DubAPI.prototype.queuePlaylist = function (playlistid, callback) {
 
     if (typeof playlistid !== 'string') throw new TypeError('uid must be a string');
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.queuePlaylist.replace('&PID%', playlistid)}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.queuePlaylist.replace('%PID%', playlistid)}, callback);
 
     return true;
 };
@@ -635,6 +635,18 @@ DubAPI.prototype.clearQueue = function (callback) {
     if (!this._.connected) return false;
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.queueClear}, callback);
+
+    return true;
+};
+
+DubAPI.prototype.joinQueue = function(joined, callback){
+    if (!this._.connected) return false;
+
+    if (typeof locked !== 'boolean') throw new TypeError('locked must be a boolean');
+
+    var form = {queuePaused: joined ? 0 : 1};
+
+    this._.reqHandler.queue({method: 'PUT', url: endpoints.queueJoin, form: form}, callback);
 
     return true;
 };

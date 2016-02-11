@@ -642,7 +642,7 @@ DubAPI.prototype.clearQueue = function(callback) {
 DubAPI.prototype.joinQueue = function(joined, callback) {
     if (!this._.connected) return false;
 
-    if (typeof locked !== 'boolean') throw new TypeError('locked must be a boolean');
+    if (typeof joined !== 'boolean') throw new TypeError('joined must be a boolean');
 
     var form = {queuePaused: joined ? 0 : 1};
 

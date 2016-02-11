@@ -387,7 +387,7 @@ DubAPI.prototype.moderateRemoveSong = function(uid, callback) {
     return true;
 };
 
-DubAPI.prototype.moderatePauseUserQueue = function(uid, callback) {
+DubAPI.prototype.moderatePauseDJ = function(uid, callback) {
     if (!this._.connected) return false;
     if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
 
@@ -395,7 +395,7 @@ DubAPI.prototype.moderatePauseUserQueue = function(uid, callback) {
 
     if (this._.room.queue.indexWhere({uid: uid}) === -1) return false;
 
-    this._.reqHandler.queue({method: 'PUT', url: endpoints.roomQueuePauseUserQueue.replace('%UID%', uid)}, callback);
+    this._.reqHandler.queue({method: 'PUT', url: endpoints.roomQueuePauseUser.replace('%UID%', uid)}, callback);
 
     return true;
 };

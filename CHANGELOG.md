@@ -1,6 +1,11 @@
 # Change Log
 
-## [1.3.0] - 2016-01-27
+## [1.4.0] - 2016-02-04
+### Added
+- Added chat-mention permission
+- Added moderatePauseDJ [#20](https://github.com/anjanms/DubAPI/pull/20) ([@Fuechschen](https://github.com/Fuechschen))
+
+## [1.3.0] - 2016-01-28
 ### Added
 - Added user profileImage support
 - Added `user-update` event for profileImage updates
@@ -78,6 +83,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.4.0]: https://github.com/anjanms/DubAPI/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/anjanms/DubAPI/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/anjanms/DubAPI/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/anjanms/DubAPI/compare/v1.1.0...v1.2.0

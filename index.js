@@ -590,6 +590,19 @@ DubAPI.prototype.hasPermission = function(user, permission) {
  * Queue Functions
  */
 
+DubAPI.prototype.queueMedia = function(type, fkid, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof type !== 'string') throw new TypeError('type must be a string');
+    if (typeof fkid !== 'string') throw new TypeError('fkid must be a string');
+
+    var form = {songType: type, songId: fkid};
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylist, form: form}, callback);
+
+    return true;
+};
+
 DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
     if (!this._.connected) return false;
 

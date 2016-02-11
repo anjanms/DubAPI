@@ -608,14 +608,14 @@ DubAPI.prototype.clearQueue = function(callback) {
     return true;
 };
 
-DubAPI.prototype.joinQueue = function(joined, callback) {
+DubAPI.prototype.pauseQueue = function(pause, callback) {
     if (!this._.connected) return false;
 
-    if (typeof joined !== 'boolean') throw new TypeError('joined must be a boolean');
+    if (typeof pause !== 'boolean') throw new TypeError('pause must be a boolean');
 
-    var form = {queuePaused: joined ? 0 : 1};
+    var form = {queuePaused: pause ? 1 : 0};
 
-    this._.reqHandler.queue({method: 'PUT', url: endpoints.queueJoin, form: form}, callback);
+    this._.reqHandler.queue({method: 'PUT', url: endpoints.queuePause, form: form}, callback);
 
     return true;
 };

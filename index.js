@@ -631,7 +631,7 @@ DubAPI.prototype.shuffleQueue = function (callback) {
     return true;
 };
 
-DubAPI.prototype.shuffleQueue = function (callback) {
+DubAPI.prototype.clearQueue = function (callback) {
     if (!this._.connected) return false;
 
     this._.reqHandler.queue({method: 'DELETE', url: endpoints.queueClear}, callback);

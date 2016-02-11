@@ -616,7 +616,7 @@ DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
 DubAPI.prototype.clearQueue = function(callback) {
     if (!this._.connected) return false;
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.queueClear}, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomPlaylist}, callback);
 
     return true;
 };

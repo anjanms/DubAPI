@@ -223,6 +223,53 @@ DubAPI.prototype.getQueuePosition = function(uid) {
 };
 
 /*
+ * User Queue Functions
+ */
+
+DubAPI.prototype.queueMedia = function(type, fkid, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof type !== 'string') throw new TypeError('type must be a string');
+    if (typeof fkid !== 'string') throw new TypeError('fkid must be a string');
+
+    var form = {songType: type, songId: fkid};
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylist, form: form}, callback);
+
+    return true;
+};
+
+DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof playlistid !== 'string') throw new TypeError('playlistid must be a string');
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.queuePlaylist.replace('%PID%', playlistid)}, callback);
+
+    return true;
+};
+
+DubAPI.prototype.clearQueue = function(callback) {
+    if (!this._.connected) return false;
+
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomPlaylist}, callback);
+
+    return true;
+};
+
+DubAPI.prototype.pauseQueue = function(pause, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof pause !== 'boolean') throw new TypeError('pause must be a boolean');
+
+    var form = {queuePaused: pause ? 1 : 0};
+
+    this._.reqHandler.queue({method: 'PUT', url: endpoints.queuePause, form: form}, callback);
+
+    return true;
+};
+
+/*
  * Moderation Functions
  */
 
@@ -584,53 +631,6 @@ DubAPI.prototype.isStaff = function(user) {
 DubAPI.prototype.hasPermission = function(user, permission) {
     if (!this._.connected || user === undefined) return false;
     return this._.room.users.findWhere({id: user.id}).hasPermission(permission);
-};
-
-/*
- * Queue Functions
- */
-
-DubAPI.prototype.queueMedia = function(type, fkid, callback) {
-    if (!this._.connected) return false;
-
-    if (typeof type !== 'string') throw new TypeError('type must be a string');
-    if (typeof fkid !== 'string') throw new TypeError('fkid must be a string');
-
-    var form = {songType: type, songId: fkid};
-
-    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylist, form: form}, callback);
-
-    return true;
-};
-
-DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
-    if (!this._.connected) return false;
-
-    if (typeof playlistid !== 'string') throw new TypeError('uid must be a string');
-
-    this._.reqHandler.queue({method: 'POST', url: endpoints.queuePlaylist.replace('%PID%', playlistid)}, callback);
-
-    return true;
-};
-
-DubAPI.prototype.clearQueue = function(callback) {
-    if (!this._.connected) return false;
-
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomPlaylist}, callback);
-
-    return true;
-};
-
-DubAPI.prototype.pauseQueue = function(pause, callback) {
-    if (!this._.connected) return false;
-
-    if (typeof pause !== 'boolean') throw new TypeError('pause must be a boolean');
-
-    var form = {queuePaused: pause ? 1 : 0};
-
-    this._.reqHandler.queue({method: 'PUT', url: endpoints.queuePause, form: form}, callback);
-
-    return true;
 };
 
 module.exports = DubAPI;

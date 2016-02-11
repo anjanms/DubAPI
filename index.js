@@ -586,7 +586,6 @@ DubAPI.prototype.hasPermission = function(user, permission) {
     return this._.room.users.findWhere({id: user.id}).hasPermission(permission);
 };
 
-
 /*
  * Queue Functions
  */

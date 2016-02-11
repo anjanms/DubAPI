@@ -623,14 +623,6 @@ DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
     return true;
 };
 
-DubAPI.prototype.shuffleQueue = function(callback) {
-    if (!this._.connected) return false;
-
-    this._.reqHandler.queue({method: 'POST', url: endpoints.queueShuffle}, callback);
-
-    return true;
-};
-
 DubAPI.prototype.clearQueue = function(callback) {
     if (!this._.connected) return false;
 

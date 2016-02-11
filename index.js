@@ -613,7 +613,7 @@ DubAPI.prototype.joinQueue = function(joined, callback) {
 
     if (typeof joined !== 'boolean') throw new TypeError('joined must be a boolean');
 
-    var form = {queuePaused: joined ? 0 : 1};
+    var form = {queuePaused: joined ? 1 : 0};
 
     this._.reqHandler.queue({method: 'PUT', url: endpoints.queueJoin, form: form}, callback);
 

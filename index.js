@@ -586,4 +586,38 @@ DubAPI.prototype.hasPermission = function(user, permission) {
     return this._.room.users.findWhere({id: user.id}).hasPermission(permission);
 };
 
+/*
+ * Queue Functions
+ */
+
+DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof playlistid !== 'string') throw new TypeError('uid must be a string');
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.queuePlaylist.replace('%PID%', playlistid)}, callback);
+
+    return true;
+};
+
+DubAPI.prototype.clearQueue = function(callback) {
+    if (!this._.connected) return false;
+
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.queueClear}, callback);
+
+    return true;
+};
+
+DubAPI.prototype.joinQueue = function(joined, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof joined !== 'boolean') throw new TypeError('joined must be a boolean');
+
+    var form = {queuePaused: joined ? 1 : 0};
+
+    this._.reqHandler.queue({method: 'PUT', url: endpoints.queueJoin, form: form}, callback);
+
+    return true;
+};
+
 module.exports = DubAPI;

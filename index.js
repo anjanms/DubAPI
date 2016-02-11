@@ -626,7 +626,7 @@ DubAPI.prototype.queuePlaylist = function(playlistid, callback) {
 DubAPI.prototype.shuffleQueue = function(callback) {
     if (!this._.connected) return false;
 
-    this._.reqHandler.queue({method: 'ORDER', url: endpoints.queueShuffle}, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.queueShuffle}, callback);
 
     return true;
 };

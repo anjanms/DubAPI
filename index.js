@@ -121,7 +121,10 @@ DubAPI.prototype.connect = function(slug) {
                     return that.disconnect();
                 }
 
-                body.data.map(function(data) {return new UserModel(data);}).forEach(function(userModel) {that._.room.users.add(userModel);});
+                body.data.map(function(data) {return new UserModel(data);}).forEach(function(userModel) {
+
+                    that._.room.users.add(userModel);
+                });
 
                 that._.actHandler.updatePlay();
                 that._.actHandler.updateQueue();
@@ -350,9 +353,7 @@ DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
 
     if (index === position || index === -1) return false;
 
-    var queue = this._.room.queue.map(function(queueItem) {
-        return queueItem.uid;
-    });
+    var queue = this._.room.queue.map(function(queueItem) {return queueItem.uid;});
 
     queue.splice(position, 0, queue.splice(index, 1)[0]);
 
@@ -535,9 +536,7 @@ DubAPI.prototype.getUsers = function() {
 DubAPI.prototype.getStaff = function() {
     if (!this._.connected) return [];
 
-    return utils.clone(this._.room.users.filter(function(user) {
-        return user.role !== null;
-    }));
+    return utils.clone(this._.room.users.filter(function(user) {return user.role !== null;}));
 };
 
 /*

@@ -122,7 +122,6 @@ DubAPI.prototype.connect = function(slug) {
                 }
 
                 body.data.map(function(data) {return new UserModel(data);}).forEach(function(userModel) {
-
                     that._.room.users.add(userModel);
                 });
 

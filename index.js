@@ -21,7 +21,7 @@ var pkg = require('./package.json'),
     roles = require('./lib/data/roles.js'),
     endpoints = require('./lib/data/endpoints.js');
 
-function DubAPI (auth, callback) {
+function DubAPI(auth, callback) {
     if (typeof auth !== 'object') throw new TypeError('auth must be an object');
 
     if (typeof auth.username !== 'string') throw new TypeError('auth.username must be a string');
@@ -121,11 +121,7 @@ DubAPI.prototype.connect = function(slug) {
                     return that.disconnect();
                 }
 
-                body.data.map(function(data) {
-                    return new UserModel(data);
-                }).forEach(function(userModel) {
-                    that._.room.users.add(userModel);
-                });
+                body.data.map(function(data) {return new UserModel(data);}).forEach(function(userModel) {that._.room.users.add(userModel);});
 
                 that._.actHandler.updatePlay();
                 that._.actHandler.updateQueue();
@@ -414,11 +410,7 @@ DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({
-        method: 'POST',
-        url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', roles[role].id),
-        form: form
-    }, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', roles[role].id), form: form}, callback);
 
     return true;
 };
@@ -433,11 +425,7 @@ DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
-    this._.reqHandler.queue({
-        method: 'DELETE',
-        url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role),
-        form: form
-    }, callback);
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role), form: form}, callback);
 
     return true;
 };
@@ -465,21 +453,13 @@ DubAPI.prototype.moderateLockQueue = function(locked, callback) {
 DubAPI.prototype.updub = function(callback) {
     if (!this._.connected || !this._.room.play || this._.room.play.dubs[this._.self.id] === 'updub') return;
 
-    this._.reqHandler.queue({
-        method: 'POST',
-        url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id),
-        form: {type: 'updub'}
-    }, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id), form: {type: 'updub'}}, callback);
 };
 
 DubAPI.prototype.downdub = function(callback) {
     if (!this._.connected || !this._.room.play || this._.room.play.dubs[this._.self.id] === 'downdub') return;
 
-    this._.reqHandler.queue({
-        method: 'POST',
-        url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id),
-        form: {type: 'downdub'}
-    }, callback);
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomPlaylistVote.replace('%PLAYLISTID%', this._.room.play.id), form: {type: 'downdub'}}, callback);
 };
 
 DubAPI.prototype.getMedia = function() {

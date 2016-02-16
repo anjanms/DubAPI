@@ -5,11 +5,11 @@
     "main": "index.js",
     "author": "anjanms",
     "dependencies": {
-        "pubnub": "3.8.x",
+        "pubnub": "3.9.x",
         "request": "2.x.x"
     },
     "devDependencies": {
-        "eslint": "1.10.x"
+        "eslint": "2.x.x"
     },
     "engines": {
         "node": ">= 0.10.0"

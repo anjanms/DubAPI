@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.5.1] - 2016-02-16
+### Dependencies
+- Updated PubNub to 3.9.0
+- Updated ESLint to 2.0.0
+
 ## [1.5.0] - 2016-02-11
 ### Added
 - Added user queue methods (queuePlaylist, clearQueue, pauseQueue) [#21](https://github.com/anjanms/DubAPI/issues/21) [#22](https://github.com/anjanms/DubAPI/pull/22) ([@Fuechschen](https://github.com/Fuechschen))
@@ -88,6 +93,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.5.1]: https://github.com/anjanms/DubAPI/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/anjanms/DubAPI/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/anjanms/DubAPI/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/anjanms/DubAPI/compare/v1.2.1...v1.3.0

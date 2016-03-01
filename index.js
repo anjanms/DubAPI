@@ -170,7 +170,7 @@ DubAPI.prototype.reconnect = function() {
     this.connect(slug);
 };
 
-DubAPI.prototype.sendChat = function(message) {
+DubAPI.prototype.sendChat = function(message, callback) {
     if (!this._.connected) return;
 
     if (typeof message !== 'string') throw new TypeError('message must be a string');
@@ -192,7 +192,9 @@ DubAPI.prototype.sendChat = function(message) {
         body.time = Date.now();
         body.message = message[i];
 
-        this._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: utils.clone(body), isChat: true});
+        this._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: utils.clone(body), isChat: true}, callback);
+
+        callback = undefined;
 
         if (i >= this.maxChatMessageSplits) break;
     }

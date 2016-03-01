@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.6.0] - 2016-03-01
+### Added
+- Added callback functionality to sendChat [#23](https://github.com/anjanms/DubAPI/issues/23)
+
+### Dependencies
+- Updated PubNub to 3.13.0
+
 ## [1.5.1] - 2016-02-16
 ### Dependencies
 - Updated PubNub to 3.9.0
@@ -93,6 +100,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.0]: https://github.com/anjanms/DubAPI/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/anjanms/DubAPI/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/anjanms/DubAPI/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/anjanms/DubAPI/compare/v1.3.0...v1.4.0

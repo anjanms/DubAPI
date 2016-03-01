@@ -100,7 +100,7 @@ DubAPI.prototype.connect = function(slug) {
                 connect: that.emit.bind(that, 'pubnub:connect'),
                 reconnect: that.emit.bind(that, 'pubnub:reconnect'),
                 disconnect: that.emit.bind(that, 'pubnub:disconnect'),
-                //Restore gets overridden after an unsubscribe in PubNub 3.7.18
+                //Restore gets overridden during an unsubscribe in PubNub 3.13.x
                 //Pass in the current PubNub time to only fetch messages since now
                 timetoken: currentTime
             });

@@ -5,7 +5,7 @@
     "main": "index.js",
     "author": "anjanms",
     "dependencies": {
-        "pubnub": "3.9.x",
+        "pubnub": "3.13.x",
         "request": "2.x.x"
     },
     "devDependencies": {

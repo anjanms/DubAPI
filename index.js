@@ -2,7 +2,7 @@
 
 var util = require('util'),
     eventEmitter = require('events').EventEmitter,
-    pubnub = require('pubnub');
+    ably = require('ably');
 
 var RoomModel = require('./lib/models/roomModel.js'),
     SelfModel = require('./lib/models/selfModel.js'),
@@ -38,7 +38,7 @@ function DubAPI(auth, callback) {
     this._.connected = false;
     this._.actHandler = new ActionHandler(this, auth);
     this._.reqHandler = new RequestHandler(this);
-    this._.pubNub = undefined;
+    this._.ably = undefined;
 
     this._.slug = undefined;
     this._.self = undefined;
@@ -55,12 +55,13 @@ function DubAPI(auth, callback) {
 
             that._.self = new SelfModel(body.data);
 
-            that._.pubNub = pubnub({
-                backfill: false,
-                restore: false,
-                subscribe_key: 'sub-c-2b40f72a-6b59-11e3-ab46-02ee2ddab7fe', //eslint-disable-line camelcase
-                ssl: true,
-                uuid: that._.self.id
+            that._.ably = new ably.Realtime({
+                authCallback: function(tokenParams, done) {
+                    that._.reqHandler.queue({method: 'GET', url: endpoints.authToken}, function(code, body) {
+                        if (code !== 200) return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authToken)));
+                        done(undefined, body.data);
+                    });
+                }
             });
 
             callback(undefined, that);
@@ -93,18 +94,7 @@ DubAPI.prototype.connect = function(slug) {
 
         that._.room = new RoomModel(body.data);
 
-        that._.pubNub.time(function(currentTime) {
-            that._.pubNub.subscribe({
-                channel: that._.room.realTimeChannel,
-                callback: utils.bind(EventHandler, that),
-                connect: that.emit.bind(that, 'pubnub:connect'),
-                reconnect: that.emit.bind(that, 'pubnub:reconnect'),
-                disconnect: that.emit.bind(that, 'pubnub:disconnect'),
-                //Restore gets overridden during an unsubscribe in PubNub 3.13.x
-                //Pass in the current PubNub time to only fetch messages since now
-                timetoken: currentTime
-            });
-        });
+        that._.ably.channels.get('room:' + that._.room.id).subscribe(utils.bind(EventHandler, that));
 
         that._.reqHandler.queue({method: 'POST', url: endpoints.roomUsers}, function(code, body) {
             if ([200, 401].indexOf(code) === -1) {
@@ -145,9 +135,7 @@ DubAPI.prototype.disconnect = function() {
     if (this._.room) {
         clearTimeout(this._.room.playTimeout);
 
-        this._.pubNub.unsubscribe({
-            channel: this._.room.realTimeChannel
-        });
+        this._.ably.channels.get('room:' + this._.room.id).unsubscribe();
 
         this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomUsers});
     }

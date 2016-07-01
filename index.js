@@ -38,7 +38,9 @@ function DubAPI(auth, callback) {
     this._.connected = false;
     this._.actHandler = new ActionHandler(this, auth);
     this._.reqHandler = new RequestHandler(this);
+
     this._.ably = undefined;
+    this._.ablyRoomChannel = undefined;
 
     this._.slug = undefined;
     this._.self = undefined;
@@ -94,7 +96,10 @@ DubAPI.prototype.connect = function(slug) {
 
         that._.room = new RoomModel(body.data);
 
-        that._.ably.channels.get('room:' + that._.room.id).subscribe(utils.bind(EventHandler, that));
+        that._.ablyRoomChannel = that._.ably.channels.get('room:' + that._.room.id);
+
+        that._.ablyRoomChannel.subscribe(utils.bind(EventHandler, that));
+        that._.ablyRoomChannel.presence.enter();
 
         that._.reqHandler.queue({method: 'POST', url: endpoints.roomUsers}, function(code, body) {
             if ([200, 401].indexOf(code) === -1) {
@@ -132,11 +137,15 @@ DubAPI.prototype.disconnect = function() {
 
     this._.reqHandler.clear();
 
+    if (this._.ablyRoomChannel) {
+        this._.ablyRoomChannel.unsubscribe();
+        this._.ablyRoomChannel.presence.leave();
+    }
+
+    this._.ablyRoomChannel = undefined;
+
     if (this._.room) {
         clearTimeout(this._.room.playTimeout);
-
-        this._.ably.channels.get('room:' + this._.room.id).unsubscribe();
-
         this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomUsers});
     }
 

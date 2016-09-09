@@ -58,6 +58,7 @@ function DubAPI(auth, callback) {
             that._.self = new SelfModel(body.data);
 
             that._.ably = new ably.Realtime({
+                environment: 'dubtrack',
                 authCallback: function(tokenParams, done) {
                     that._.reqHandler.queue({method: 'GET', url: endpoints.authToken}, function(code, body) {
                         if (code !== 200) return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authToken)));

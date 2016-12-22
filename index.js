@@ -1,8 +1,7 @@
 'use strict';
 
 var util = require('util'),
-    eventEmitter = require('events').EventEmitter,
-    ably = require('ably');
+    eventEmitter = require('events').EventEmitter;
 
 var RoomModel = require('./lib/models/roomModel.js'),
     SelfModel = require('./lib/models/selfModel.js'),
@@ -10,6 +9,7 @@ var RoomModel = require('./lib/models/roomModel.js'),
 
 var RequestHandler = require('./lib/requestHandler.js'),
     ActionHandler = require('./lib/actionHandler.js'),
+    SocketHandler = require('./lib/socketHandler.js'),
     EventHandler = require('./lib/eventHandler.js');
 
 var DubAPIError = require('./lib/errors/error.js'),
@@ -38,9 +38,7 @@ function DubAPI(auth, callback) {
     this._.connected = false;
     this._.actHandler = new ActionHandler(this, auth);
     this._.reqHandler = new RequestHandler(this);
-
-    this._.ably = undefined;
-    this._.ablyRoomChannel = undefined;
+    this._.sokHandler = new SocketHandler(this);
 
     this._.slug = undefined;
     this._.self = undefined;
@@ -57,17 +55,13 @@ function DubAPI(auth, callback) {
 
             that._.self = new SelfModel(body.data);
 
-            that._.ably = new ably.Realtime({
-                environment: 'dubtrack',
-                authCallback: function(tokenParams, done) {
-                    that._.reqHandler.queue({method: 'GET', url: endpoints.authToken}, function(code, body) {
-                        if (code !== 200) return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authToken)));
-                        done(undefined, body.data);
-                    });
-                }
-            });
+            that._.reqHandler.queue({method: 'GET', url: endpoints.authToken}, function(code, body) {
+                if (code !== 200) return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authToken)));
 
-            callback(undefined, that);
+                that._.sokHandler.connect(body.data.token);
+
+                callback(undefined, that);
+            });
         });
     });
 }
@@ -97,10 +91,7 @@ DubAPI.prototype.connect = function(slug) {
 
         that._.room = new RoomModel(body.data);
 
-        that._.ablyRoomChannel = that._.ably.channels.get('room:' + that._.room.id);
-
-        that._.ablyRoomChannel.subscribe(utils.bind(EventHandler, that));
-        that._.ablyRoomChannel.presence.enter();
+        that._.sokHandler.attachChannel('room:' + that._.room.id, utils.bind(EventHandler, that));
 
         that._.reqHandler.queue({method: 'POST', url: endpoints.roomUsers}, function(code, body) {
             if ([200, 401].indexOf(code) === -1) {
@@ -138,12 +129,7 @@ DubAPI.prototype.disconnect = function() {
 
     this._.reqHandler.clear();
 
-    if (this._.ablyRoomChannel) {
-        this._.ablyRoomChannel.unsubscribe();
-        this._.ablyRoomChannel.presence.leave();
-    }
-
-    this._.ablyRoomChannel = undefined;
+    this._.sokHandler.detachChannel('room:' + this._.room.id);
 
     if (this._.room) {
         clearTimeout(this._.room.playTimeout);

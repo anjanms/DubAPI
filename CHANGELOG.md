@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.6.4] - 2016-12-22
+### Changed
+- Now using Dubtrack's own WebSockets [#32](https://github.com/anjanms/DubAPI/issues/32)
+
 ## [1.6.3] - 2016-09-09
 ### Changed
 - Set Ably environment to `dubtrack`
@@ -115,6 +119,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.4]: https://github.com/anjanms/DubAPI/compare/v1.6.3...v1.6.4
 [1.6.3]: https://github.com/anjanms/DubAPI/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/anjanms/DubAPI/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/anjanms/DubAPI/compare/v1.6.0...v1.6.1

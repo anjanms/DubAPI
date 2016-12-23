@@ -55,13 +55,9 @@ function DubAPI(auth, callback) {
 
             that._.self = new SelfModel(body.data);
 
-            that._.reqHandler.queue({method: 'GET', url: endpoints.authToken}, function(code, body) {
-                if (code !== 200) return callback(new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.authToken)));
+            that._.sokHandler.connect();
 
-                that._.sokHandler.connect(body.data.token);
-
-                callback(undefined, that);
-            });
+            callback(undefined, that);
         });
     });
 }

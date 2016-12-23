@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.6.5] - 2016-12-22
+### Fixed
+- Fixed a crash when creating a RequestError
+- Fixed a case where the bot could be left without a socket connection
+- Removed an extra authToken request that was accidentally left behind
+
 ## [1.6.4] - 2016-12-22
 ### Changed
 - Now using Dubtrack's own WebSockets [#32](https://github.com/anjanms/DubAPI/issues/32)
@@ -119,6 +125,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.5]: https://github.com/anjanms/DubAPI/compare/v1.6.4...v1.6.5
 [1.6.4]: https://github.com/anjanms/DubAPI/compare/v1.6.3...v1.6.4
 [1.6.3]: https://github.com/anjanms/DubAPI/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/anjanms/DubAPI/compare/v1.6.1...v1.6.2

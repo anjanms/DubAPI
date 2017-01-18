@@ -1,28 +1,28 @@
 {
-    "name": "dubapi",
-    "version": "1.6.5",
-    "description": "A NodeJS module for creating dubtrack.fm bots",
-    "main": "index.js",
-    "author": "anjanms",
-    "dependencies": {
-        "engine.io-client": "1.x.x",
-        "request": "2.x.x"
-    },
-    "devDependencies": {
-        "eslint": "2.x.x"
-    },
-    "engines": {
-        "node": ">= 0.10.0"
-    },
-    "keywords": [
-        "bot",
-        "api",
-        "dubtrack",
-        "dubtrack.fm"
-    ],
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/anjanms/DubAPI"
-    }
+  "name": "dubapi",
+  "version": "1.6.5",
+  "description": "A NodeJS module for creating dubtrack.fm bots",
+  "main": "index.js",
+  "author": "anjanms",
+  "dependencies": {
+    "engine.io-client": "^1.8.2",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "eslint": "^2.13.1"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "keywords": [
+    "bot",
+    "api",
+    "dubtrack",
+    "dubtrack.fm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anjanms/DubAPI"
+  }
 }

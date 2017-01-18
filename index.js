@@ -125,10 +125,9 @@ DubAPI.prototype.disconnect = function() {
 
     this._.reqHandler.clear();
 
-    this._.sokHandler.detachChannel('room:' + this._.room.id);
-
     if (this._.room) {
         clearTimeout(this._.room.playTimeout);
+        this._.sokHandler.detachChannel('room:' + this._.room.id);
         this._.reqHandler.queue({method: 'DELETE', url: endpoints.roomUsers});
     }
 

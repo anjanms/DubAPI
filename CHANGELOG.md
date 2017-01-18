@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.6.6] - 2017-01-18
+### Fixed
+- Fixed a TypeError on bot disconnect [#34](https://github.com/anjanms/DubAPI/issues/34)
+
+## Changed
+- Changed dependency version selector to appease [David DM](https://david-dm.org/anjanms/DubAPI)
+
 ## [1.6.5] - 2016-12-22
 ### Fixed
 - Fixed a crash when creating a RequestError
@@ -125,6 +132,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.6]: https://github.com/anjanms/DubAPI/compare/v1.6.5...v1.6.6
 [1.6.5]: https://github.com/anjanms/DubAPI/compare/v1.6.4...v1.6.5
 [1.6.4]: https://github.com/anjanms/DubAPI/compare/v1.6.3...v1.6.4
 [1.6.3]: https://github.com/anjanms/DubAPI/compare/v1.6.2...v1.6.3

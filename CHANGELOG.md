@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.6.7] - 2017-02-21
+## Changed
+- Now sends presence enter message when attaching to room channels
+
+### Dependencies
+- Updated engine.io-client to 2.0.0
+
 ## [1.6.6] - 2017-01-18
 ### Fixed
 - Fixed a TypeError on bot disconnect [#34](https://github.com/anjanms/DubAPI/issues/34)
@@ -132,6 +139,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.7]: https://github.com/anjanms/DubAPI/compare/v1.6.6...v1.6.7
 [1.6.6]: https://github.com/anjanms/DubAPI/compare/v1.6.5...v1.6.6
 [1.6.5]: https://github.com/anjanms/DubAPI/compare/v1.6.4...v1.6.5
 [1.6.4]: https://github.com/anjanms/DubAPI/compare/v1.6.3...v1.6.4

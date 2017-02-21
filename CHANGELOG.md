@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.6.8] - 2017-02-21
+### Changed
+- Send presence enter on socket reconnect too
+
 ## [1.6.7] - 2017-02-21
 ### Changed
 - Now sends presence enter message when attaching to room channels
@@ -139,6 +143,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.8]: https://github.com/anjanms/DubAPI/compare/v1.6.7...v1.6.8
 [1.6.7]: https://github.com/anjanms/DubAPI/compare/v1.6.6...v1.6.7
 [1.6.6]: https://github.com/anjanms/DubAPI/compare/v1.6.5...v1.6.6
 [1.6.5]: https://github.com/anjanms/DubAPI/compare/v1.6.4...v1.6.5

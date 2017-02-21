@@ -1,7 +1,7 @@
 # Change Log
 
 ## [1.6.7] - 2017-02-21
-## Changed
+### Changed
 - Now sends presence enter message when attaching to room channels
 
 ### Dependencies
@@ -11,7 +11,7 @@
 ### Fixed
 - Fixed a TypeError on bot disconnect [#34](https://github.com/anjanms/DubAPI/issues/34)
 
-## Changed
+### Changed
 - Changed dependency version selector to appease [David DM](https://david-dm.org/anjanms/DubAPI)
 
 ## [1.6.5] - 2016-12-22

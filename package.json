@@ -5,7 +5,7 @@
   "main": "index.js",
   "author": "anjanms",
   "dependencies": {
-    "engine.io-client": "^2.0.2",
+    "engine.io-client": "^3.2.1",
     "request": "^2.79.0"
   },
   "devDependencies": {

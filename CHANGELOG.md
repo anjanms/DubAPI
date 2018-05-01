@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.6.9] - 2018-05-01
+### Dependencies
+- Updated engine.io-client to 3.2.1 [#37](https://github.com/anjanms/DubAPI/issues/37)
+
 ## [1.6.8] - 2017-02-21
 ### Changed
 - Send presence enter on socket reconnect too
@@ -143,6 +147,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[1.6.9]: https://github.com/anjanms/DubAPI/compare/v1.6.8...v1.6.9
 [1.6.8]: https://github.com/anjanms/DubAPI/compare/v1.6.7...v1.6.8
 [1.6.7]: https://github.com/anjanms/DubAPI/compare/v1.6.6...v1.6.7
 [1.6.6]: https://github.com/anjanms/DubAPI/compare/v1.6.5...v1.6.6

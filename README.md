@@ -1,4 +1,4 @@
-# DubAPI [![][buildbadge]][buildlink] [![][depbadge]][deplink] [![][npmbadge]][npmlink] [![][licbadge]][liclink]
+# DubAPI [![][depbadge]][deplink] [![][npmbadge]][npmlink] [![][licbadge]][liclink]
 
 ## About
 
@@ -46,9 +46,6 @@ new DubAPI({username: '', password: ''}, function(err, bot) {
 ## Credit
 
 - Design cues taken from [PlugAPI](https://github.com/plugCubed/plugAPI)
-
-[buildlink]: https://travis-ci.org/anjanms/DubAPI
-[buildbadge]: https://img.shields.io/travis/anjanms/DubAPI.svg "Build Status"
 
 [deplink]: https://david-dm.org/anjanms/DubAPI
 [depbadge]: https://img.shields.io/david/anjanms/DubAPI.svg "Dependency Status"

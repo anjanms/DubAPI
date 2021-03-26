@@ -600,6 +600,11 @@ DubAPI.prototype.isResidentDJ = function(user) {
     return user.role === roles['resident-dj'].id;
 };
 
+DubAPI.prototype.isDJ = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['dj'].id;
+};
+
 DubAPI.prototype.isStaff = function(user) {
     if (!this._.connected || user === undefined) return false;
     return user.role !== null;

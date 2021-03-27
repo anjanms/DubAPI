@@ -1,0 +1,44 @@
+name: npm audit
+
+on:
+  push:
+    branches: [master]
+    paths: [package.json]
+  pull_request:
+    branches: [master]
+    paths: [package.json]
+  schedule:
+    - cron: '0 0 1,16 * *'
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+
+    strategy:
+      matrix:
+        node-version: [12, 14]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Node JS
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm install --package-lock
+
+      - name: List Dependencies
+        continue-on-error: true
+        run: npm list
+
+      - name: Outdated Dependencies
+        continue-on-error: true
+        run: npm outdated
+
+      - name: Audit Dependencies
+        run: npm audit --audit-level=moderate

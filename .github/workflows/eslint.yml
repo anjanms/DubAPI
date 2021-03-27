@@ -10,6 +10,8 @@ on:
 
 jobs:
   eslint:
+    name: ESLint
+
     runs-on: ubuntu-latest
 
     steps:
@@ -20,11 +22,8 @@ jobs:
       with:
         node-version: '14'
 
-    - name: Install Development Dependencies
-      run: npm install --only=development
-
-    - name: Install ESLint CLI
-      run: npm install --global eslint-cli
+    - name: Install Dependencies
+      run: npm install
 
     - name: Run ESLint
-      run: eslint .
+      run: node_modules/.bin/eslint .

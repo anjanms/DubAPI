@@ -12,6 +12,8 @@ on:
 
 jobs:
   npm:
+    name: Node v${{ matrix.node-version }}
+
     runs-on: ubuntu-latest
 
     env:
@@ -30,11 +32,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
-        run: npm install --package-lock
+        run: npm install --package-lock --no-audit
 
       - name: List Dependencies
         continue-on-error: true
-        run: npm list
+        run: npm list --all
 
       - name: Outdated Dependencies
         continue-on-error: true

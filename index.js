@@ -85,18 +85,24 @@ DubAPI.prototype.connect = function(slug) {
             return that.disconnect();
         }
 
-        that._.room = new RoomModel(body.data);
+        var roomJoinEndpoint = endpoints.roomUsers.replace('%RID%', body.data._id);
 
-        that._.sokHandler.attachChannel('room:' + that._.room.id, utils.bind(EventHandler, that));
-
-        that._.reqHandler.queue({method: 'POST', url: endpoints.roomUsers}, function(code, body) {
+        that._.reqHandler.queue({method: 'POST', url: roomJoinEndpoint}, function(code, body) {
             if ([200, 401].indexOf(code) === -1) {
-                that.emit('error', new DubAPIRequestError(code, that._.reqHandler.endpoint(endpoints.roomUsers)));
+                that.emit('error', new DubAPIRequestError(code, roomJoinEndpoint));
                 return that.disconnect();
             } else if (code === 401) {
-                that.emit('error', new DubAPIError(that._.self.username + ' is banned from ' + that._.room.name));
+                that.emit('error', new DubAPIError(that._.self.username + ' is banned from ' + that._.slug));
                 return that.disconnect();
             }
+
+            that._.room = new RoomModel(body.data.room);
+
+            body.data.user._user = utils.clone(that._.self);
+
+            that._.room.users.add(new UserModel(body.data.user));
+
+            that._.sokHandler.attachChannel('room:' + that._.room.id, utils.bind(EventHandler, that));
 
             that._.reqHandler.queue({method: 'GET', url: endpoints.roomUsers}, function(code, body) {
                 if (code !== 200) {

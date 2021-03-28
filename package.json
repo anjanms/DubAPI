@@ -7,7 +7,7 @@
   "dependencies": {
     "engine.io-client": "^3.2.1",
     "got": "^11.8.2",
-    "tough-cookie": "^2.5.0"
+    "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
     "eslint": "^2.13.1"

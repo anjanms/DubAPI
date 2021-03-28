@@ -177,7 +177,7 @@ DubAPI.prototype.sendChat = function(message, callback) {
         body.time = Date.now();
         body.message = message[i];
 
-        this._.reqHandler.queue({method: 'POST', url: endpoints.chat, body: utils.clone(body), isChat: true}, callback);
+        this._.reqHandler.queue({method: 'POST', url: endpoints.chat, json: utils.clone(body), isChat: true}, callback);
 
         callback = undefined;
 

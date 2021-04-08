@@ -1,4 +1,4 @@
-# DubAPI [![][npmbadge]][npmlink] [![][licbadge]][liclink]
+# DubAPI [![][eslintbadge]][eslintlink] [![][auditbadge]][auditlink] [![][versionbadge]][versionlink] [![][licensebadge]][licenselink]
 
 ## About
 
@@ -55,8 +55,14 @@ new DubAPI({username: '', password: ''}, function(err, bot) {
 
 - Design cues taken from [PlugAPI](https://github.com/plugCubed/plugAPI)
 
-[npmlink]: https://www.npmjs.com/package/dubapi
-[npmbadge]: https://img.shields.io/npm/v/dubapi.svg "npm version"
+[eslintlink]: https://github.com/anjanms/DubAPI/actions/workflows/eslint.yml
+[eslintbadge]: https://img.shields.io/github/workflow/status/anjanms/DubAPI/ESLint?label=ESLint&logo=github "ESLint"
 
-[liclink]: https://github.com/anjanms/DubAPI/blob/master/LICENSE.md
-[licbadge]: https://img.shields.io/npm/l/dubapi.svg "License"
+[auditlink]: https://github.com/anjanms/DubAPI/actions/workflows/npm.yml
+[auditbadge]: https://img.shields.io/github/workflow/status/anjanms/DubAPI/npm%20audit?label=npm%20audit&logo=github "npm audit"
+
+[versionlink]: https://www.npmjs.com/package/dubapi
+[versionbadge]: https://img.shields.io/npm/v/dubapi "npm version"
+
+[licenselink]: https://github.com/anjanms/DubAPI/blob/master/LICENSE.md
+[licensebadge]: https://img.shields.io/npm/l/dubapi "npm license"

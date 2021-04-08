@@ -4,11 +4,19 @@
 
 A NodeJS API for creating dubtrack.fm bots.
 
-## Usage
+## Installation
 
 ```
 npm install dubapi
 ```
+
+Optionally, the [websocket implementation](https://github.com/websockets/ws) can make use of native addons for [performance and spec compliance](https://github.com/websockets/ws#opt-in-for-performance-and-spec-compliance).
+
+```
+npm install --save-optional bufferutil utf-8-validate
+```
+
+## Usage
 
 ```javascript
 

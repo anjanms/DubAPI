@@ -1,6 +1,6 @@
 {
   "name": "dubapi",
-  "version": "1.6.9",
+  "version": "2.0.0",
   "description": "A Node.js API for creating queup.net bots",
   "main": "index.js",
   "author": "anjanms",

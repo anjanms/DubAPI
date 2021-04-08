@@ -1,5 +1,20 @@
 # Change Log
 
+## [2.0.0] - 2021-04-08
+### Added
+- Added `dj` role and methods [#35](https://github.com/anjanms/DubAPI/pull/35) ([@Zolfax](https://github.com/Zolfax))
+
+### Changed
+- Changed site domain to `queup.net` [#38](https://github.com/anjanms/DubAPI/pull/38) ([@dakoenig](https://github.com/dakoenig))
+- Enabled HTTP keep alive
+
+### Fixed
+- Fixed a race condition in room connect flow that leaves the bot user undefined
+
+### Dependencies
+- Replaced the now deprecated [request](https://github.com/request/request/issues/3142) with [got](https://github.com/sindresorhus/got) as HTTP client
+- Updated node engines to `^12.12.0 || >=14.0.0`
+
 ## [1.6.9] - 2018-05-01
 ### Dependencies
 - Updated engine.io-client to 3.2.1 [#37](https://github.com/anjanms/DubAPI/issues/37)
@@ -147,6 +162,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[2.0.0]: https://github.com/anjanms/DubAPI/compare/v1.6.9...v2.0.0
 [1.6.9]: https://github.com/anjanms/DubAPI/compare/v1.6.8...v1.6.9
 [1.6.8]: https://github.com/anjanms/DubAPI/compare/v1.6.7...v1.6.8
 [1.6.7]: https://github.com/anjanms/DubAPI/compare/v1.6.6...v1.6.7

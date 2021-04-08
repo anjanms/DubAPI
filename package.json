@@ -1,11 +1,11 @@
 {
   "name": "dubapi",
   "version": "1.6.9",
-  "description": "A NodeJS module for creating dubtrack.fm bots",
+  "description": "A Node.js API for creating queup.net bots",
   "main": "index.js",
   "author": "anjanms",
   "dependencies": {
-    "engine.io-client": "^3.2.1",
+    "engine.io-client": "^3.5.1",
     "got": "^11.8.2",
     "tough-cookie": "^4.0.0"
   },
@@ -18,12 +18,9 @@
   "keywords": [
     "bot",
     "api",
-    "dubtrack",
-    "dubtrack.fm"
+    "queup",
+    "queup.net"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/anjanms/DubAPI"
-  }
+  "repository": "github:anjanms/DubAPI"
 }

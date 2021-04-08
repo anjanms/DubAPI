@@ -2,7 +2,7 @@
 
 ## About
 
-A NodeJS API for creating dubtrack.fm bots.
+A Node.js API for creating queup.net bots.
 
 ## Installation
 

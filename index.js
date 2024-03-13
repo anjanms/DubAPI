@@ -611,6 +611,11 @@ DubAPI.prototype.isDJ = function(user) {
     return user.role === roles['dj'].id;
 };
 
+DubAPI.prototype.isMember = function(user) {
+    if (!this._.connected || user === undefined) return false;
+    return user.role === roles['member'].id;
+};
+
 DubAPI.prototype.isStaff = function(user) {
     if (!this._.connected || user === undefined) return false;
     return user.role !== null;

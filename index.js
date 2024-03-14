@@ -480,6 +480,31 @@ DubAPI.prototype.moderateLockQueue = function(locked, callback) {
     return true;
 };
 
+DubAPI.prototype.moderateSetOption = function(option, value, callback) {
+    if (!this._.connected) return false;
+    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mod-settings')) return false;
+
+    if (this._.room[option] === value) return false;
+
+    if (option === 'allowGuestsToChat' && typeof value !== 'boolean') {
+        throw new TypeError('allowGuestsToChat must be a boolean');
+    }
+
+    if (option === 'allowGuestsToEmbed' && typeof value !== 'boolean') {
+        throw new TypeError('allowGuestsToEmbed must be a boolean');
+    }
+
+    if (option === 'slowMode' && typeof value !== 'boolean') {
+        throw new TypeError('slowMode must be a boolean');
+    }
+
+    var form = {action: option, value: value};
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.roomModSettings, form: form}, callback);
+
+    return true;
+};
+
 /*
  * Media Functions
  */

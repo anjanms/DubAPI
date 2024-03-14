@@ -1,5 +1,18 @@
 # Change Log
 
+## [2.1.0] - 2024-03-13
+### Added
+- Added fetching & caching of media info in queue, `playlist/details` no longer includes it
+- Added moderation option event & endpoint data [#39](https://github.com/anjanms/DubAPI/pull/39) ([@Al3366](https://github.com/Al3366))
+- Added event handling for `room-allow-guest-chat`, `room-allow-guest-embed`, `room-slow-mode`
+- Added `moderateSetOption` method to change moderator accessible settings
+
+### Changed
+- Updated role & permission data to match website [#39](https://github.com/anjanms/DubAPI/pull/39) ([@Al3366](https://github.com/Al3366))
+
+### Fixed
+- Fixed a TypeError on advance when `songInfo` is null
+
 ## [2.0.0] - 2021-04-08
 ### Added
 - Added `dj` role and methods [#35](https://github.com/anjanms/DubAPI/pull/35) ([@Zolfax](https://github.com/Zolfax))
@@ -162,6 +175,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[2.1.0]: https://github.com/anjanms/DubAPI/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/anjanms/DubAPI/compare/v1.6.9...v2.0.0
 [1.6.9]: https://github.com/anjanms/DubAPI/compare/v1.6.8...v1.6.9
 [1.6.8]: https://github.com/anjanms/DubAPI/compare/v1.6.7...v1.6.8

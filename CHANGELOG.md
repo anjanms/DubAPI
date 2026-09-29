@@ -1,5 +1,10 @@
 # Change Log
 
+## [2.1.1] - 2026-09-??
+
+## Fixed
+- [issue #40](https://github.com/anjanms/DubAPI/issues/40) caused by Queup's recent update to the data returned from the `user-setrole` and `user-unsetrole` events
+
 ## [2.1.0] - 2024-03-13
 ### Added
 - Added fetching & caching of media info in queue, `playlist/details` no longer includes it

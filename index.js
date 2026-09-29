@@ -18,7 +18,6 @@ var DubAPIError = require('./lib/errors/error.js'),
 var pkg = require('./package.json'),
     utils = require('./lib/utils.js'),
     events = require('./lib/data/events.js'),
-    roles = require('./lib/data/roles.js'),
     endpoints = require('./lib/data/endpoints.js');
 
 function DubAPI(auth, callback) {
@@ -65,7 +64,6 @@ function DubAPI(auth, callback) {
 util.inherits(DubAPI, eventEmitter);
 
 DubAPI.prototype.events = events;
-DubAPI.prototype.roles = roles;
 DubAPI.prototype.version = pkg.version;
 
 /*
@@ -114,11 +112,14 @@ DubAPI.prototype.connect = function(slug) {
                     that._.room.users.add(userModel);
                 });
 
-                that._.actHandler.updatePlay();
-                that._.actHandler.updateQueue();
+                //Without roles only the room owner has permissions, so keep connecting either way
+                that._.actHandler.updateRoles(function() {
+                    that._.actHandler.updatePlay();
+                    that._.actHandler.updateQueue();
 
-                that._.connected = true;
-                that.emit('connected', that._.room.name);
+                    that._.connected = true;
+                    that.emit('connected', that._.room.name);
+                });
             });
         });
     });
@@ -262,7 +263,7 @@ DubAPI.prototype.pauseQueue = function(pause, callback) {
 
 DubAPI.prototype.moderateSkip = function(callback) {
     if (!this._.connected || !this._.room.play) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('skip')) return false;
+    if (!this.hasPermission(this._.self, 'skip')) return false;
 
     if (this._.room.play.skipped) return false;
 
@@ -276,7 +277,7 @@ DubAPI.prototype.moderateSkip = function(callback) {
 
 DubAPI.prototype.moderateDeleteChat = function(cid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('delete-chat')) return false;
+    if (!this.hasPermission(this._.self, 'delete-chat')) return false;
 
     if (typeof cid !== 'string') throw new TypeError('cid must be a string');
 
@@ -287,7 +288,7 @@ DubAPI.prototype.moderateDeleteChat = function(cid, callback) {
 
 DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return false;
+    if (!this.hasPermission(this._.self, 'ban')) return false;
 
     if (typeof time === 'function') {
         callback = time;
@@ -298,8 +299,7 @@ DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
     if (time !== undefined && !Number.isInteger(time)) throw new TypeError('time must be undefined or an integer');
     if (time && time < 0) throw new RangeError('time must be zero or greater');
 
-    var user = this._.room.users.findWhere({id: uid});
-    if (user && user.role !== null) return false;
+    if (!this._outranks(uid)) return false;
 
     var form = {realTimeChannel: this._.room.realTimeChannel, time: time ? time : 0};
 
@@ -310,7 +310,7 @@ DubAPI.prototype.moderateBanUser = function(uid, time, callback) {
 
 DubAPI.prototype.moderateUnbanUser = function(uid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('ban')) return false;
+    if (!this.hasPermission(this._.self, 'ban')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
@@ -323,7 +323,7 @@ DubAPI.prototype.moderateUnbanUser = function(uid, callback) {
 
 DubAPI.prototype.moderateKickUser = function(uid, msg, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('kick')) return false;
+    if (!this.hasPermission(this._.self, 'kick')) return false;
 
     if (typeof msg === 'function') {
         callback = msg;
@@ -333,8 +333,7 @@ DubAPI.prototype.moderateKickUser = function(uid, msg, callback) {
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (['string', 'undefined'].indexOf(typeof msg) === -1) throw new TypeError('msg must be a string or undefined');
 
-    var user = this._.room.users.findWhere({id: uid});
-    if (user && user.role !== null) return false;
+    if (!this._outranks(uid)) return false;
 
     var form = {realTimeChannel: this._.room.realTimeChannel, message: msg ? utils.encodeHTMLEntities(msg) : ''};
 
@@ -345,12 +344,13 @@ DubAPI.prototype.moderateKickUser = function(uid, msg, callback) {
 
 DubAPI.prototype.moderateMuteUser = function(uid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return false;
+    if (!this.hasPermission(this._.self, 'mute')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
+    //Only members without a role can be muted, and never the room owner or the bot itself
     var user = this._.room.users.findWhere({id: uid});
-    if (user && user.role !== null) return false;
+    if (uid === this._.self.id || uid === this._.room.user || user && user.role !== null) return false;
 
     var form = {realTimeChannel: this._.room.realTimeChannel};
 
@@ -361,7 +361,7 @@ DubAPI.prototype.moderateMuteUser = function(uid, callback) {
 
 DubAPI.prototype.moderateUnmuteUser = function(uid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mute')) return false;
+    if (!this.hasPermission(this._.self, 'mute')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
@@ -374,7 +374,7 @@ DubAPI.prototype.moderateUnmuteUser = function(uid, callback) {
 
 DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
+    if (!this.hasPermission(this._.self, 'queue-order')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (!Number.isInteger(position)) throw new TypeError('position must be an integer');
@@ -397,7 +397,7 @@ DubAPI.prototype.moderateMoveDJ = function(uid, position, callback) {
 
 DubAPI.prototype.moderateRemoveDJ = function(uid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
+    if (!this.hasPermission(this._.self, 'queue.dj.remove')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
@@ -410,7 +410,7 @@ DubAPI.prototype.moderateRemoveDJ = function(uid, callback) {
 
 DubAPI.prototype.moderateRemoveSong = function(uid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
+    if (!this.hasPermission(this._.self, 'queue.remove')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
@@ -423,7 +423,7 @@ DubAPI.prototype.moderateRemoveSong = function(uid, callback) {
 
 DubAPI.prototype.moderatePauseDJ = function(uid, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('queue-order')) return false;
+    if (!this.hasPermission(this._.self, 'queue.dj.remove')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
 
@@ -435,38 +435,50 @@ DubAPI.prototype.moderatePauseDJ = function(uid, callback) {
 };
 
 DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
+    return this._changeRole('PUT', uid, role, callback);
+};
+
+DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
+    return this._changeRole('DELETE', uid, role, callback);
+};
+
+//role can be a role id, label or starter role templateKey
+DubAPI.prototype._changeRole = function(method, uid, role, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return false;
+    if (!this.hasPermission(this._.self, 'roles.manage')) return false;
 
     if (typeof uid !== 'string') throw new TypeError('uid must be a string');
     if (typeof role !== 'string') throw new TypeError('role must be a string');
-    if (roles[role] === undefined) throw new DubAPIError('role not found');
 
-    var form = {realTimeChannel: this._.room.realTimeChannel};
+    var roleData = this._.room.findRole(role);
+    if (roleData === undefined) throw new DubAPIError('role not found');
 
-    this._.reqHandler.queue({method: 'POST', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', roles[role].id), form: form}, callback);
+    //The bot can only manage roles, and members, ranked below itself
+    if (roleData.isDefault || roleData.position >= this._.room.rank(this._.self, true)) return false;
+    if (!this._outranks(uid)) return false;
+
+    var url = endpoints.roomUserRole.replace('%UID%', uid).replace('%ROLEID%', roleData.id);
+
+    this._.reqHandler.queue({method: method, url: url}, callback);
 
     return true;
 };
 
-DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
-    if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('set-roles')) return false;
+//Kicking, banning and role changes only work on members ranked below the bot
+DubAPI.prototype._outranks = function(uid) {
+    if (uid === this._.self.id) return false;
 
-    if (typeof uid !== 'string') throw new TypeError('uid must be a string');
-    if (typeof role !== 'string') throw new TypeError('role must be a string');
-    if (roles[role] === undefined) throw new DubAPIError('role not found');
+    var user = this._.room.users.findWhere({id: uid});
 
-    var form = {realTimeChannel: this._.room.realTimeChannel};
+    //Not in the room, so let the server decide
+    if (!user) return uid !== this._.room.user;
 
-    this._.reqHandler.queue({method: 'DELETE', url: endpoints.setRole.replace('%UID%', uid).replace('%ROLEID%', role), form: form}, callback);
-
-    return true;
+    return this._.room.rank(user) < this._.room.rank(this._.self, true);
 };
 
 DubAPI.prototype.moderateLockQueue = function(locked, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('lock-queue')) return false;
+    if (!this.hasPermission(this._.self, 'lock-queue')) return false;
 
     if (this._.room.lockQueue === locked) return false;
 
@@ -482,7 +494,7 @@ DubAPI.prototype.moderateLockQueue = function(locked, callback) {
 
 DubAPI.prototype.moderateSetOption = function(option, value, callback) {
     if (!this._.connected) return false;
-    if (!this._.room.users.findWhere({id: this._.self.id}).hasPermission('mod-settings')) return false;
+    if (!this.hasPermission(this._.self, 'mod-settings')) return false;
 
     if (this._.room[option] === value) return false;
 
@@ -601,49 +613,64 @@ DubAPI.prototype.getStaff = function() {
  * Role Functions
  */
 
+DubAPI.prototype.getRoles = function() {
+    if (!this._.connected) return [];
+
+    return utils.clone(this._.room.roles, {deep: true});
+};
+
+//Rooms can rename or delete their starter roles, so these checks only find roles still carrying the templateKey
+DubAPI.prototype._holdsStarterRole = function(user, templateKey) {
+    if (!this._.connected || user === undefined) return false;
+
+    var userModel = this._.room.users.findWhere({id: user.id}),
+        role = this._.room.roles.find(function(r) {return r.templateKey === templateKey;});
+
+    return Boolean(userModel && role && userModel.roles.indexOf(role.id) !== -1);
+};
+
 DubAPI.prototype.isCreator = function(user) {
     if (!this._.connected || user === undefined) return false;
     return user.id === this._.room.user;
 };
 
 DubAPI.prototype.isOwner = function(user) {
-    if (!this._.connected || user === undefined) return false;
-    return user.role === roles['co-owner'].id;
+    return this._holdsStarterRole(user, 'co-owner');
 };
 
 DubAPI.prototype.isManager = function(user) {
-    if (!this._.connected || user === undefined) return false;
-    return user.role === roles['manager'].id;
+    return this._holdsStarterRole(user, 'manager');
 };
 
 DubAPI.prototype.isMod = function(user) {
-    if (!this._.connected || user === undefined) return false;
-    return user.role === roles['mod'].id;
+    return this._holdsStarterRole(user, 'mod');
 };
 
 DubAPI.prototype.isVIP = function(user) {
-    if (!this._.connected || user === undefined) return false;
-    return user.role === roles['vip'].id;
+    return this._holdsStarterRole(user, 'vip');
 };
 
 DubAPI.prototype.isResidentDJ = function(user) {
-    if (!this._.connected || user === undefined) return false;
-    return user.role === roles['resident-dj'].id;
+    return this._holdsStarterRole(user, 'resident-dj');
 };
 
 DubAPI.prototype.isDJ = function(user) {
-    if (!this._.connected || user === undefined) return false;
-    return user.role === roles['dj'].id;
+    return this._holdsStarterRole(user, 'dj');
 };
 
+//An ordinary member, holding no role besides the room's default one
 DubAPI.prototype.isMember = function(user) {
     if (!this._.connected || user === undefined) return false;
-    return user.role === roles['member'].id;
+
+    var userModel = this._.room.users.findWhere({id: user.id});
+    return Boolean(userModel && userModel.role === null);
 };
 
 DubAPI.prototype.isStaff = function(user) {
     if (!this._.connected || user === undefined) return false;
-    return user.role !== null;
+
+    var userModel = this._.room.users.findWhere({id: user.id});
+    return Boolean(userModel && userModel.role !== null);
 };
 
 /*
@@ -651,8 +678,12 @@ DubAPI.prototype.isStaff = function(user) {
  */
 
 DubAPI.prototype.hasPermission = function(user, permission) {
-    if (!this._.connected || user === undefined) return false;
-    return this._.room.users.findWhere({id: user.id}).hasPermission(permission);
+    if (!this._.room || user === undefined) return false;
+
+    var userModel = this._.room.users.findWhere({id: user.id});
+    if (!userModel) return false;
+
+    return this._.room.hasPermission(userModel, permission, user.id === this._.self.id);
 };
 
 module.exports = DubAPI;

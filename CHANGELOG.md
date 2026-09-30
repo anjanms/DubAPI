@@ -1,9 +1,9 @@
 # Change Log
 
-## [2.1.1] - 2026-09-??
+## [2.1.1] - 2026-09-30
 
-## Fixed
-- [issue #40](https://github.com/anjanms/DubAPI/issues/40) caused by Queup's recent update to the data returned from the `user-setrole` and `user-unsetrole` events
+### Fixed
+- Quick fix for crash caused by Queup's recent update to the data returned from the `user-setrole` and `user-unsetrole` events [#40](https://github.com/anjanms/DubAPI/issues/40) [#41](https://github.com/anjanms/DubAPI/pull/41) ([@FranciscoG](https://github.com/FranciscoG))
 
 ## [2.1.0] - 2024-03-13
 ### Added
@@ -180,6 +180,7 @@
 - Enabled strict mode
 - Enabled gzip compression
 
+[2.1.1]: https://github.com/anjanms/DubAPI/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/anjanms/DubAPI/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/anjanms/DubAPI/compare/v1.6.9...v2.0.0
 [1.6.9]: https://github.com/anjanms/DubAPI/compare/v1.6.8...v1.6.9

@@ -51,6 +51,15 @@ new DubAPI({username: '', password: ''}, function(err, bot) {
 });
 
 ```
+
+## Testing
+
+Tests use the built in Node.js test runner and need Node.js 20 or newer.
+
+```
+npm test
+```
+
 ## Credit
 
 - Design cues taken from [PlugAPI](https://github.com/plugCubed/plugAPI)

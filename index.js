@@ -434,15 +434,36 @@ DubAPI.prototype.moderatePauseDJ = function(uid, callback) {
     return true;
 };
 
+/**
+ * Give a member a role, a member can hold several roles.
+ * @param {string} uid - Id of the member
+ * @param {string} role - Role id, label (any case) or starter role templateKey, e.g. 'mod'
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
 DubAPI.prototype.moderateSetRole = function(uid, role, callback) {
     return this._changeRole('PUT', uid, role, callback);
 };
 
+/**
+ * Take a role away from a member.
+ * @param {string} uid - Id of the member
+ * @param {string} role - Role id, label (any case) or starter role templateKey, e.g. 'mod'
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
 DubAPI.prototype.moderateUnsetRole = function(uid, role, callback) {
     return this._changeRole('DELETE', uid, role, callback);
 };
 
-//role can be a role id, label or starter role templateKey
+/**
+ * Assign or remove a role, the bot needs roles.manage and must outrank both the role and the member.
+ * @param {string} method - PUT to assign, DELETE to remove
+ * @param {string} uid - Id of the member
+ * @param {string} role - Role id, label (any case) or starter role templateKey, e.g. 'mod'
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
 DubAPI.prototype._changeRole = function(method, uid, role, callback) {
     if (!this._.connected) return false;
     if (!this.hasPermission(this._.self, 'roles.manage')) return false;
@@ -464,7 +485,11 @@ DubAPI.prototype._changeRole = function(method, uid, role, callback) {
     return true;
 };
 
-//Kicking, banning and role changes only work on members ranked below the bot
+/**
+ * Whether the bot ranks above a member, kicking, banning and role changes only work on members below it.
+ * @param {string} uid - Id of the member
+ * @returns {boolean} true if the bot outranks the member, or the member is not in the room and is not the owner
+ */
 DubAPI.prototype._outranks = function(uid) {
     if (uid === this._.self.id) return false;
 
@@ -474,6 +499,145 @@ DubAPI.prototype._outranks = function(uid) {
     if (!user) return uid !== this._.room.user;
 
     return this._.room.rank(user) < this._.room.rank(this._.self, true);
+};
+
+/**
+ * Whether the bot can manage a role: it needs roles.manage, must outrank the role and hold every permission it grants.
+ * @param {object} [roleData] - The role being changed, omit when creating or reordering
+ * @param {string[]} [permissions] - Permission keys the bot would put on the role
+ * @returns {boolean} true if the bot is allowed
+ */
+DubAPI.prototype._canManageRole = function(roleData, permissions) {
+    if (!this.hasPermission(this._.self, 'roles.manage')) return false;
+    if (roleData && roleData.position >= this._.room.rank(this._.self, true)) return false;
+
+    return (permissions || []).every(function(permission) {
+        return this.hasPermission(this._.self, permission);
+    }, this);
+};
+
+/**
+ * Create a role in the room, new roles are placed just above the default role.
+ * @param {object} data - The new role
+ * @param {string} data.label - Display name, 1 to 32 characters
+ * @param {string} [data.color] - Hex colour, e.g. '#00aeff'
+ * @param {string[]} [data.permissions] - Permission keys, the bot must hold each one
+ * @param {boolean} [data.mentionable] - Whether anyone can @mention the role
+ * @param {boolean} [data.displaySeparately] - Whether holders get their own heading in the user list
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
+DubAPI.prototype.createRole = function(data, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof data !== 'object' || data === null) throw new TypeError('data must be an object');
+    if (typeof data.label !== 'string') throw new TypeError('data.label must be a string');
+
+    if (!this._canManageRole(undefined, data.permissions)) return false;
+
+    this._.reqHandler.queue({method: 'POST', url: endpoints.createRole, json: utils.clone(data)}, callback);
+
+    return true;
+};
+
+/**
+ * Change a role, fields not in changes keep their current value.
+ * @param {string} role - Role id, label (any case) or starter role templateKey, e.g. 'mod'
+ * @param {object} changes - Any of label, color, permissions, mentionable, displaySeparately
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
+DubAPI.prototype.updateRole = function(role, changes, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof role !== 'string') throw new TypeError('role must be a string');
+    if (typeof changes !== 'object' || changes === null) throw new TypeError('changes must be an object');
+
+    var roleData = this._.room.findRole(role);
+    if (roleData === undefined) throw new DubAPIError('role not found');
+
+    //The API replaces the whole role, fields left out are cleared
+    var body = {
+        label: roleData.label,
+        color: roleData.color,
+        permissions: roleData.permissions,
+        mentionable: roleData.mentionable,
+        displaySeparately: roleData.displaySeparately
+    };
+
+    for (var key in body) {
+        if (changes.hasOwnProperty(key)) body[key] = changes[key];
+    }
+
+    if (!this._canManageRole(roleData, body.permissions)) return false;
+
+    var url = endpoints.updateRole.replace('%ROLEID%', roleData.id);
+
+    this._.reqHandler.queue({method: 'PUT', url: url, json: utils.clone(body, {deep: true})}, callback);
+
+    return true;
+};
+
+/**
+ * Delete a role, everyone holding it loses it. The default role cannot be deleted.
+ * @param {string} role - Role id, label (any case) or starter role templateKey, e.g. 'mod'
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
+DubAPI.prototype.deleteRole = function(role, callback) {
+    if (!this._.connected) return false;
+
+    if (typeof role !== 'string') throw new TypeError('role must be a string');
+
+    var roleData = this._.room.findRole(role);
+    if (roleData === undefined) throw new DubAPIError('role not found');
+
+    if (roleData.isDefault || !this._canManageRole(roleData)) return false;
+
+    this._.reqHandler.queue({method: 'DELETE', url: endpoints.deleteRole.replace('%ROLEID%', roleData.id)}, callback);
+
+    return true;
+};
+
+/**
+ * Reorder the room's roles, roles the bot does not outrank must keep their place.
+ * @param {string[]} order - Every role in the room exactly once, highest first, with the default role last.
+ * Each entry is a role id, label or starter role templateKey
+ * @param {function} [callback] - Called with the HTTP status code and response body
+ * @returns {boolean} true if the request was queued, false if the bot is not allowed and nothing was sent
+ */
+DubAPI.prototype.reorderRoles = function(order, callback) {
+    if (!this._.connected) return false;
+
+    if (!Array.isArray(order)) throw new TypeError('order must be an array');
+
+    var room = this._.room,
+        ids = order.map(function(role) {
+            var roleData = typeof role === 'string' ? room.findRole(role) : undefined;
+            if (roleData === undefined) throw new DubAPIError('role not found: ' + role);
+            return roleData.id;
+        });
+
+    var listsEveryRole = ids.length === room.roles.length && room.roles.every(function(role) {
+        return ids.indexOf(role.id) !== -1;
+    });
+
+    if (!listsEveryRole) throw new DubAPIError('order must list every role in the room exactly once');
+    if (!room.findRole(ids[ids.length - 1]).isDefault) throw new DubAPIError('the default role must be last');
+
+    if (!this._canManageRole()) return false;
+
+    //Roles the bot does not outrank must keep their index
+    var rank = room.rank(this._.self, true),
+        movesHigherRole = room.roles.some(function(role, index) {
+            return role.position >= rank && ids[index] !== role.id;
+        });
+
+    if (movesHigherRole) return false;
+
+    this._.reqHandler.queue({method: 'PUT', url: endpoints.reorderRoles, json: {order: ids}}, callback);
+
+    return true;
 };
 
 DubAPI.prototype.moderateLockQueue = function(locked, callback) {
@@ -613,13 +777,23 @@ DubAPI.prototype.getStaff = function() {
  * Role Functions
  */
 
+/**
+ * The room's roles, highest position first.
+ * @returns {object[]} A copy of the roles, empty when not connected
+ */
 DubAPI.prototype.getRoles = function() {
     if (!this._.connected) return [];
 
     return utils.clone(this._.room.roles, {deep: true});
 };
 
-//Rooms can rename or delete their starter roles, so these checks only find roles still carrying the templateKey
+/**
+ * Whether a user holds one of the room's starter roles. Rooms can rename or delete their starter roles, so this
+ * only finds roles still carrying the templateKey.
+ * @param {object} user - The user, only its id is used
+ * @param {string} templateKey - Starter role key, e.g. 'mod' or 'resident-dj'
+ * @returns {boolean} true if the user holds that role
+ */
 DubAPI.prototype._holdsStarterRole = function(user, templateKey) {
     if (!this._.connected || user === undefined) return false;
 

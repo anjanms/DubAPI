@@ -15,6 +15,7 @@
 ### Added
 - Added support for QueUp's [custom roles](https://queup.net/blog/custom-roles-are-here), roles and permissions are now loaded per room
 - Added `getRoles` method, returning the room's roles
+- Added `createRole`, `updateRole`, `deleteRole` and `reorderRoles` methods to manage the room's roles
 - Added `user.roles`, the ids of every role a user holds
 - Added event handling for `room-role-create`, `room-role-update`, `room-role-delete`, `room-roles-reorder`
 - Added unit tests, run with `npm test` on Node.js 20 or newer

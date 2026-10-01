@@ -128,6 +128,24 @@ test('updateRoles stores the API response and takes the bot\'s roles from the ac
     assert.strictEqual(room.users.findWhere({id: fixtures.BOT_ID}).role, ids.tester);
 });
 
+test('updateRoles ignores a response that arrives after leaving the room', function() {
+    var room = new RoomModel({_id: fixtures.ROOM_ID}),
+        done = false,
+        dubAPI = {_: {room: room, self: {id: fixtures.BOT_ID}, reqHandler: {}}};
+
+    dubAPI._.reqHandler.queue = function(options, callback) {
+        dubAPI._.room = undefined;
+        callback(200, {data: {roles: fixtures.roles(), actor: fixtures.actor()}});
+    };
+
+    new ActionHandler(dubAPI, {}).updateRoles(function() {
+        done = true;
+    });
+
+    assert.ok(!done);
+    assert.deepStrictEqual(room.roles, []);
+});
+
 test('updateRoles emits an error and still calls back when the request fails', function() {
     var room = new RoomModel({_id: fixtures.ROOM_ID}),
         errors = [],

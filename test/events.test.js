@@ -105,6 +105,7 @@ test('room-role-delete removes the role from every user and refreshes', function
     api.send({type: 'room-role-delete', roleid: ids.dj});
 
     assert.deepStrictEqual(api.user('target').roles, []);
+    assert.strictEqual(api.user('target').role, null);
     assert.strictEqual(api.refreshes, 1);
 });
 

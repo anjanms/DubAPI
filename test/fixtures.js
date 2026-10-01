@@ -92,7 +92,6 @@ function roleEvent(type, targetId, roleData) {
         type: type,
         user: {_id: OWNER_ID, username: 'owner'},
         targetUser: {_id: targetId, username: 'target'},
-        userid: targetId,
         role: roleData
     };
 }

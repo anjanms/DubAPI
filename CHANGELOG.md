@@ -1,5 +1,41 @@
 # Change Log
 
+## [3.0.0] - 2026-09-??
+### Breaking Changes
+- Removed `roles`, the hard-coded role table. Role ids are now different in every room, use `getRoles` to get the room's roles
+- `user.role` is a room-specific role id, so comparing it to the old global role ids no longer works. Use `user.roles` to see every role a user holds
+- `isOwner`, `isManager`, `isMod`, `isVIP`, `isResidentDJ` and `isDJ` return `true` for any starter role the user holds, not only their highest one. They return `false` if the room renamed its starter roles into custom ones or deleted them
+- `isOwner` is `false` for the room creator, who holds no role on QueUp. Use `isCreator` instead
+- `isMember` no longer checks for the old "member" role, which no longer exists. It is now `true` for users holding no role besides the room's default one
+- `moderateKickUser` and `moderateBanUser` now refuse members ranked at or above the bot, and allow members with a lower role. Before, they refused anyone holding a role
+- `moderateSetRole` and `moderateUnsetRole` return `false` for roles at or above the bot's own and for members not ranked below it. The `member` role name throws `role not found`
+- `moderateRemoveSong` needs `queue.remove`, and `moderateRemoveDJ` and `moderatePauseDJ` need `queue.dj.remove`, instead of `queue-order`
+- The `set-dj` permission name is no longer recognized, so `hasPermission` returns `false` for it
+
+### Added
+- Added support for QueUp's [custom roles](https://queup.net/blog/custom-roles-are-here), roles and permissions are now loaded per room
+- Added `getRoles` method, returning the room's roles
+- Added `createRole`, `updateRole`, `deleteRole` and `reorderRoles` methods to manage the room's roles
+- Added `user.roles`, the ids of every role a user holds
+- Added event handling for `room-role-create`, `room-role-update`, `room-role-delete`, `room-roles-reorder`
+- Added unit tests, run with `npm test` on Node.js 20 or newer
+
+### Changed
+- `user.role` is now the id of the highest role a user holds, or `null`
+- `hasPermission` accepts the new permission keys (e.g. `members.kick`), the old names still work because they are mapped to the new ones
+- `moderateKickUser` and `moderateBanUser` only work on members ranked below the bot
+- `moderateMuteUser` refuses the room owner and the bot itself
+- `moderateRemoveSong` now needs `queue.remove`, `moderateRemoveDJ` and `moderatePauseDJ` need `queue.dj.remove`
+- `moderateSetRole` and `moderateUnsetRole` use the new role endpoints and accept a role id, label or starter role key (e.g. `mod`)
+- `isOwner`, `isManager`, `isMod`, `isVIP`, `isResidentDJ`, `isDJ` check whether a user holds that starter role, so more than one can be true
+- `isMember` now means a user holds no role besides the room's default one
+
+### Removed
+- Removed `roles`, use `getRoles` instead
+
+### Fixed
+- Fixed `moderateUnsetRole` sending the role name instead of its id
+
 ## [2.1.1] - 2026-09-30
 
 ### Fixed

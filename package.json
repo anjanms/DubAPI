@@ -1,6 +1,6 @@
 {
   "name": "dubapi",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "A Node.js API for creating queup.net bots",
   "main": "index.js",
   "author": "anjanms",
@@ -14,6 +14,16 @@
   },
   "engines": {
     "node": "^12.12.0 || >=14.0.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=20",
+      "onFail": "error"
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
   },
   "keywords": [
     "bot",
